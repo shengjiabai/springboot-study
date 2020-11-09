@@ -42,26 +42,5 @@ public class SemaphoreConcurrencyTest {
     }
 
 
-    /*
-     CMS 帮助中心内容管理系统
-     邮乐内容管理平台
-
-     
-     全网文本类信息发布，调用等操作进行集中化管理，统一提供标准api接口。
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     */
 
 }

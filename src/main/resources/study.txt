@@ -1,5 +1,5 @@
 面试讲2个项目： 商品高性能、秒杀、我的收藏、库存  definition定义beandefinition
-ulemall_DataSync_DSF_SV_V3_3921685
+
 
 https://www.cnblogs.com/Leo_wl/p/6181466.html 商品建模
 简单归纳下：

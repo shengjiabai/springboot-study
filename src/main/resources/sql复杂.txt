@@ -172,3 +172,54 @@ FULL JOIN (
 ORDER BY
 	COUNT DESC,
 	OWNER_ID DESC
+	
+	
+	
+	
+SELECT
+  UPDATE_TIME AS ROW_LASTUPDATE_TIME,
+  DEL_FLAG AS IS_DELETED,
+  (CASE DATA_TYPE WHEN '1' THEN DATA_VALUE else 0 end ) AS ACTIVITY_ID,
+  (CASE DATA_TYPE WHEN '1' THEN CODE_NAME else NULL end ) AS ACTIVITY_NAME,
+  (CASE DATA_TYPE WHEN '2' THEN DATA_VALUE else 0 end ) AS RECOMMAND_ID,
+  (CASE DATA_TYPE WHEN '2' THEN CODE_NAME else NULL end ) AS RECOMMAND_NAME
+FROM
+	`RET_PLATFORM_CATEGORY`
+WHERE
+	CONFIG_DATA_TYPE = 1
+AND DEL_FLAG = 1;
+
+
+SELECT
+  publish_time as ROW_LASTUPDATE_TIME,
+	listing_id AS LIST_ID,
+  module_key AS  RECOMMAND_ID,
+ module_name AS  RECOMMAND_NAME,
+ module_type AS  RECOMMAND_TYPE,
+ biz_type AS  RECOMMAND_BIZ_TYPE,
+del_flag AS  IS_DELETED,
+is_lock AS IS_LOCKED,
+publish_time AS PUBLISH_TIME,
+task_run_time AS  TASK_RUN_TIME 
+FROM
+	t_ext_rec_publish_listing
+where
+publish_time >=(NOW()-INTERVAL '30 minute');
+
+
+
+SELECT
+ to_char(COALESCE(publish_time,now()), 'yyyy-mm-dd hh24:mi:ss') as ROW_LASTUPDATE_TIME,
+	listing_id AS LIST_ID,
+  module_key AS  RECOMMAND_ID,
+ module_name AS  RECOMMAND_NAME,
+ module_type AS  RECOMMAND_TYPE,
+ biz_type AS  RECOMMAND_BIZ_TYPE,
+del_flag AS  IS_DELETED,
+is_lock AS IS_LOCKED,
+publish_time AS PUBLISH_TIME,
+task_run_time AS  TASK_RUN_TIME 
+
+FROM
+	t_ext_rec_publish_listing;
+	

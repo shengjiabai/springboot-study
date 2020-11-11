@@ -1,0 +1,116 @@
+https://www.runoob.com/docker/docker-install-mysql.html
+
+一。安装和启动：
+1、使用 sudo 或 root 权限登录 Centos。
+a.确保yum包更新到最新： sudo yum update
+c.安装一些必要的系统工具： sudo yum install -y yum-utils device-mapper-persistent-data lvm2
+d.添加软件源信息： sudo yum-config-manager --add-repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+e.安装 Docker-ce： sudo yum -y install docker-ce
+f.查看docker版本： docker -v
+
+g.镜像加速
+鉴于国内网络问题，后续拉取 Docker 镜像十分缓慢，我们可以需要配置加速器来解决，我使用的是网易的镜像地址：http://hub-mirror.c.163.com。
+/etc/docker/daemon.json（Linux） 没有自己创建
+https://docker.mirrors.ustc.edu.cn
+{
+  "registry-mirrors": ["https://docker.mirrors.ustc.edu.cn"]
+}
+
+k.启动 Docker 进程: systemctl start docker
+l.查看docker进程：systemctl status docker 
+m.停止docker: systemctl stop docker 
+n.重启docker : systemctl restart docker 
+o.删除 Docker CE :$ sudo yum remove docker-ce
+                  $ sudo rm -rf /var/lib/docker
+p.开机自动重启 ：systemctl enable docker
+r.docker基本信息：docker info
+
+
+二。镜像常用命令：
+a.列出镜像列表 docker images
+b.搜索镜像 docker search    eg: docker search centos
+c.拉取镜像：比如要拉取上面搜出来的镜像用  docker pull  ubuntu:13.1
+d.删除镜像：1.按照镜像id删除：docker rmi 镜像id
+            2.删除所有镜像：docker rmi `docker images -q`
+			
+三：容器相关命令：
+a.查看正在运行的容器： docker ps  
+  查看所有容器 ： docker ps -a
+b.启动容器 : docker run -i
+   -d:让容器在后台运行 
+   -i ：标识运行容器
+    交互式创建容器：docker run -it --name=容器名称  镜像名称：标签 /bin/bash
+	后台启动守护:   docker run -id --name=容器名称  镜像名称：标签 /bin/bash
+	ps 看是否启动成功
+	exit 退出容器
+	docker exec -it mycentos2 /bin/bash  进入某个启动的容器
+c.查看所有容器 ： docker ps -a   
+  启动 docker start 名称    
+b.停止  docker  stop 
+e.查看ip :  docker inspect mycentos2
+   删选：docker inspect --format='{{.NetworkSettings.IPAddress}}' mycentos2
+f.删除容器：docker rm mycentos2    然后docker ps -a查看是否删除
+注意：这地地方区分删除容器和镜像  删除镜像是docker rmi 而删除容器是docker rm  
+k.拷贝命令： docker cp  test  bsjnginx:/usr/share/nginx    把宿主机的test目录拷贝到docker的nginx容器的/usr/share/nginx 目录下
+
+四。安装 MySQL
+docker search mysql 搜出来
+docker pull centos/mysql-57-centos7 选择要的版本拉下来
+docker images 查看下镜像时候下载下来
+docker run -id --name=mymysql -p 33306:3306  -e MYSQL_ROOT_PASSWORD=123456 mysql
+  -p 33306:3306：将容器的 3306 端口映射到主机的 33306 端口。
+  -e 代表环境变量 MYSQL_ROOT_PASSWORD 是root用户的登录密码
+docker ps 看下容器启动起来没有  
+docker exec  -it mysql /bin/bash  进去mysql容器
+mysql -h localhost -u root -p  
+
+
+
+docker run -id --name=mymysql -p 33306:3306  -e MYSQL_ROOT_PASSWORD=123456  centos/mysql-57-centos7 
+
+已经有mysql 可以直接docker start mymysql 启动
+
+五。安装 tomcat
+
+docker run -id --name=mytomcat -p 9000:8080 -v /usr/local/webapps:/usr/local/tomcat/webapps  tomcat:7 -jre7
+   -v 代表挂载在当前目录下
+    其实就是把docker tomcat的发布目录关联到了宿主机的某个目录下了
+	
+六。安装nginx	
+
+docker run -id --name=bsjnginx -p 8100:80 nginx
+
+docker exec -it bsjnginx /bin/bsah   进入nginx 
+
+nginx的目录在这个目录下 cd /etc/nginx/nginx.conf  
+
+
+nginx.conf  配置下 include /etc/nginx/conf.d/*.conf; 其实真正的配置就在这个下 然后进去 
+ 
+ 有个default.conf
+ location / {
+        root   /usr/share/nginx/html;  这个位置就是具体的目录位置，访问的欢迎页面就在这个下面 也就是静态页面的存放地址
+        index  index.html index.htm;
+    }
+实现将自己的欢迎页面放在nginx目录下 ：docker cp  html  bsjnginx:/usr/share/nginx
+	
+	
+七。迁移备份
+a.容器保存为镜像：docker commit bsjnginx bsjnginx_i    容器名称（bsjnginx） 新的镜像名称（bsjnginx_i）
+   通过docker images 就可以看到镜像
+b. 镜像的备份（保存） ：docker save -o  bsjnginx_i.tar  bsjnginx_i  
+    -o output 输出的意思
+c.镜像的恢复（导入）：docker load -i 	bsjnginx_i.tar
+    -i intput  输入的意思
+
+  使用到以前的命令  先停止容器：docker stop bsjnginx  删除容器：docker rm 	bsjnginx  删除镜像 docker rmi 	bsjnginx
+
+
+
+  
+  
+
+
+
+
+

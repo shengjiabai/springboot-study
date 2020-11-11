@@ -1,0 +1,173 @@
+Java8 Map computeIfAbsent方法说明:
+// java8之前。从map中根据key获取value操作可能会有下面的操作
+Object key = map.get("key");
+if (key == null) {
+    key = new Object();
+    map.put("key", key);
+}
+
+// java8之后。上面的操作可以简化为一行，若key对应的value为空，会将第二个参数的返回值存入并返回
+Object key2 = map.computeIfAbsent("key", k -> new Object());
+
+
+
+public class TestSupplier {
+	private int age;
+	
+	TestSupplier(){
+		System.out.println(age);
+	}
+	public static void main(String[] args) {
+		//创建Supplier容器，声明为TestSupplier类型，此时并不会调用对象的构造方法，即不会创建对象
+		Supplier<TestSupplier> sup= TestSupplier::new;
+		System.out.println("--------");
+		//调用get()方法，此时会调用对象的构造方法，即获得到真正对象
+		sup.get();
+		//每次get都会调用构造方法，即获取的对象不同
+		sup.get();
+	}
+}
+ 
+StringJoiner是JDK8为了方便构造限定分隔符，甚至于给定前缀和后缀，而提供的一个类，示例代码如下：
+
+        StringJoiner sj = new StringJoiner(",","{","}");
+        sj.add("first").add("second").add("third");
+        System.out.println(sj.toString());
+		
+		   List<String> ids = ImmutableList.of("1", "2", "3");
+        System.out.println(String.join(",", ids));
+
+--spring.profiles.active=server1
+https://mp.weixin.qq.com/s/3_HnVzGm16zU2zhk7BnwFw
+https://www.larscheng.com/archives/page/7/
+https://blog.csdn.net/zjcjava/article/details/88316190
+https://juejin.im/post/5b55b842f265da0f9e589e79#comment
+
+
+ctrl+H查看类图
+ctrl+H查看类图
+ctrl+H查看类图
+
+eureka实现多个实例
+1.配置host将同一个ip执行不用的域名
+  127.0.0.1 server1
+  127.0.0.1 server2
+  127.0.0.1 server3
+2.java -jar ad-eureka-1.0-SNAPSHOT.jar  --spring.profiles.active=server1
+ java -jar ad-eureka-1.0-SNAPSHOT.jar  --spring.profiles.active=server2
+ java -jar ad-eureka-1.0-SNAPSHOT.jar  --spring.profiles.active=server3
+ 
+ @DependsOn("dataTable")//依赖bean  使某一bean优先加载
+ 
+ 3.RestControllerAdvice  Advice增强   对spring方法进行增强
+   a.ResponseBodyAdvice 可以拦截所有的controller请求对其进行增强  相当于自定义拦截器吧
+ 
+ 4.mysql查看binlog是否开启：show variables like '%log_bin%'      值nos说明开启了
+   -- Binlog 日志的格式  show variables like 'binlog_format'
+  
+   liunx启动mysql :  service mysqld start    进入命令行：mysql -u root -p
+   
+  5.CommandLineRunner 和ApplicationRunner（可以接受系统参数变量） spring加载之后执行的方法 类似于监听器 多个可以使用@Order(value = 1)指定优先级 
+  
+  
+springCloud没发注解代表什么？
+1.@EnableFeignClients 使用Feign    
+
+
+
+6.https://tool.lu/   在线工具 很强大
+
+7.https://start.spring.io/actuator/info  springCloud和springboot版本对应关系
+
+8.dependencyManagement  和 dependencies区别?dependencyManagement父类项目申明了version 子项目中直接引用无需在写
+
+
+9.开启热部署（compile 里面abcd都勾选）
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-devtools</artifactId>
+		<scope>runtime</scope>
+		<optional>true</optional>
+	</dependency>
+	<!-- 健康监控 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+		
+10. springboot多模块开发可以开启run dashboard ,view > Tool Windows > Run Dashboard 没有则可以在工程目录下找到.idea文件夹下的workspace.xml
+	<component name="RunDashboard">
+	<option name="configurationTypes">
+	  <set>
+	    <option value="SpringBootApplicationConfigurationType"/>
+	  </set>
+	</option>
+	<option name="ruleStates">
+	  <list>
+	    <RuleState>
+	      <option name="name" value="ConfigurationTypeDashboardGroupingRule"/>
+	    </RuleState>
+	    <RuleState>
+	      <option name="name" value="StatusDashboardGroupingRule"/>
+	    </RuleState>
+	  </list>
+	</option>
+	</component>
+11.https://www.springcloud.cc/ 中文网  https://www.springcloud.cc/spring-cloud-consul.html
+
+12.Ribbon客户端负载均衡 @LoadBalanced//开启负载均衡默认使用的是轮询  还有其他的什么随机，重试等，使用其他的是需要在启动类加@RibbonClient(name = "CLOUD-PAYMENT-SERVICE", configuration = MySelfRule.class)
+
+13.方法上加final不允许继承和扩展
+
+13.feign客户端默认超时时间是1秒，超时就出现异常。配置文件需要
+# 设置feign客户端超时时间(OpenFeign默认支持ribbon)
+ribbon:
+  # 指的是建立连接所用的时间,适用于网络状态正常的情况下,两端连接所用的时间
+  ReadTimeout: 5000
+  # 指的是建立连接后从服务器读取到可用资源所用的时间
+  ConnectTimeout: 5000
+14.openfeign提供了日志打印功能。 
+  @Bean
+    public Logger.Level feignLoggerLevel() {
+        // 请求和响应的头信息,请求和响应的正文及元数据
+        return Logger.Level.FULL;
+    }
+
+15.代理代码
+ public static void withoutEnvHttpClient() throws IOException {
+        HttpHost target = new HttpHost("bizapi.jd.com", 443, "https");
+        HttpHost proxy = new HttpHost("proxy.beta.uledns.com", 443);
+        RequestConfig config = RequestConfig.custom()
+                .setProxy(proxy)
+                .build();
+        HttpGet httpget = new HttpGet("/api/message/get");
+        httpget.setConfig(config);
+        System.out.println("Executing request " + httpget.getRequestLine() + " to " + target + " via " + proxy);
+  
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        CloseableHttpResponse response = httpclient.execute(target, httpget);
+        System.out.println("----------------------------------------");
+        System.out.println(response.getStatusLine());
+        System.out.println(EntityUtils.toString(response.getEntity()));
+    }
+	
+	
+	
+16.RPC原理理解？
+ 解：1. 怎么做到透明化远程服务调用？怎么封装通信细节才能让用户像以本地调用方式调用远程服务呢？对java来说就是使用代理！
+      java代理有两种方式：1） jdk 动态代理；2）字节码生成。尽管字节码生成方式实现的代理更为强大和高效，但代码维护不易，大部分公司实现RPC框架时还是选择动态代理方式。
+	 2.序列化 反序列化（网络传输使用2进制）
+     3.	通信：　消息数据结构被序列化为二进制串后，下一步就要进行网络通信了。目前有两种常用IO通信模型：1）BIO；2）NIO。一般RPC框架需要支持这两种IO模型，
+	    基于netty，现在很多RPC框架都直接基于netty这一IO通信框架，省力又省心，比如阿里巴巴的HSF、dubbo，Twitter的finagle等。
+	 4.	服务发现：zk
+	 关键点：通信协议和序列化
+	
+	
+17.spring cloud 使用zuul(过时)、 gateway（新一代网关服务） 	 gateway使用了webflux中的reactor-netty响应式组件，底层使用netty通讯框架。
+
+	
+	
+reactor 	 [化工] 反应器；[核] 反应堆；起反应的人
+Proactor  前摄器 主动器 前摄器模式 异步情况下
+ 涉及到事件分发器的两种模式称为：Reactor和Proactor。  Reactor模式是基于同步I/O的，而Proactor模式是和异步I/O相关的。 
+	

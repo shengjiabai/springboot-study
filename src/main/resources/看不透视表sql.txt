@@ -1,0 +1,69 @@
+1.DIM_PUB_RETAIL_SKU_RECOMMAND 透视表日增量定时
+
+SELECT
+  publish_time as ROW_LASTUPDATE_TIME,
+	listing_id AS LIST_ID,
+REPLACE(module_key,chr(39),'''||''''''') as RECOMMAND_ID,
+REPLACE(module_name ,chr(39),'''||''''''') AS  RECOMMAND_NAME,
+ module_type AS  RECOMMAND_TYPE,
+ biz_type AS  RECOMMAND_BIZ_TYPE,
+del_flag AS  IS_DELETED,
+is_lock AS IS_LOCKED,
+publish_time AS PUBLISH_TIME,
+task_run_time AS  TASK_RUN_TIME 
+FROM
+	t_ext_rec_publish_listing
+where
+publish_time >=(NOW()-INTERVAL '40 minute');
+
+2.DIM_PUB_RETAIL_SKU_RECOMMAND 透视表日增量消息
+SELECT
+	1 AS IS_DELETED,
+	SYSDATE AS ROW_LASTUPDATE_TIME,
+	LIST_ID,
+	RECOMMAND_ID 
+FROM
+	DIM_PUB_RETAIL_SKU_RECOMMAND 
+WHERE
+	LIST_ID IN ( ${ LIST_ID} ) 
+	AND RECOMMAND_ID IN ( ${RECOMMAND_ID} )
+
+
+3.DIM_PUB_RETAIL_SKU_RECOMMAND 透视表 初始化全量
+SELECT
+ 
+	listing_id AS LIST_ID,
+REPLACE(module_key,chr(39),'''||''''''') as RECOMMAND_ID,
+REPLACE(module_name ,chr(39),'''||''''''') AS  RECOMMAND_NAME,
+ module_type AS  RECOMMAND_TYPE,
+ biz_type AS  RECOMMAND_BIZ_TYPE,
+del_flag AS  IS_DELETED,
+is_lock AS IS_LOCKED,
+publish_time AS PUBLISH_TIME,
+task_run_time AS  TASK_RUN_TIME 
+
+FROM
+	t_ext_rec_publish_listing;
+	
+	
+	https://gitee.com/gitsc/pro-cloud
+	https://mp.weixin.qq.com/s/Juzqt3f7vAW0uqqclncXHQ
+	https://blog.csdn.net/weixin_48502062?t=1
+	
+	
+	
+	
+	SELECT
+ 
+	listing_id AS LIST_ID,
+REPLACE(module_key,chr(39),'''||''''''') as RECOMMAND_ID,
+REPLACE(module_name ,chr(39),'''||''''''') AS  RECOMMAND_NAME,
+ module_type AS  RECOMMAND_TYPE,
+ biz_type AS  RECOMMAND_BIZ_TYPE,
+del_flag AS  IS_DELETED,
+is_lock AS IS_LOCKED,
+publish_time AS PUBLISH_TIME,
+COALESCE(task_run_time,'0') AS  TASK_RUN_TIME 
+
+FROM
+	t_ext_rec_publish_listing;

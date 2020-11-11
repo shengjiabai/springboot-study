@@ -1,0 +1,174 @@
+SELECT
+	OWNER_ID,
+	PROVINCE_NAME,
+	CITY_NAME,
+	AREA_NAME,
+	TOWN_NAME,
+	YXD_STORE_NAME,
+	USER_TRUE_NAME,
+	USER_MOBILENO,
+	RECOMMEND_USER_PHONE,
+	SKU,
+	COUNT,
+	RECOMMEND_USER_ID,
+	sum_sal_price_own,
+	order_count_own,
+	sum_sal_price_other,
+	order_count_other,
+	YXD_ORG_PROVINCE_NAME,
+	YXD_ORG_CITY_NAME,
+	YXD_ORG_AREA_NAME,
+	YXD_ORG_TOWN_NAME,
+	MERCHANT_BACKURL
+FROM
+	(
+		SELECT
+			A.OWNER_ID,
+			A.PROVINCE_NAME,
+			A.CITY_NAME,
+			A.AREA_NAME,
+			A.TOWN_NAME,
+			A.YXD_STORE_NAME,
+			A.USER_TRUE_NAME,
+			A.USER_MOBILENO,
+			A.RECOMMEND_USER_PHONE,
+			B.SKU,
+			C.COUNT,
+			A.RECOMMEND_USER_ID
+		FROM
+			(
+				SELECT
+					*
+				FROM
+					(
+						SELECT
+							ROW_NUMBER () OVER (
+								PARTITION BY OWNER_ID
+								ORDER BY
+									STORE_UPDATE_TIME DESC
+							) rowId ,*
+						FROM
+							t_ext_yxd_sales_performance_daily
+						WHERE
+							SHARE_CREATE_TIME IS NOT NULL
+					) AS PERFORMANCE
+				WHERE
+					rowId = 1
+			) AS A,
+			(
+				SELECT
+					SHARE_SKU.OWNER_ID,
+					COUNT(SHARE_SKU.OWNER_ID) SKU
+				FROM
+					(
+						SELECT DISTINCT
+							(SHARE_CONTENT_ID),
+							OWNER_ID
+						FROM
+							t_ext_yxd_sales_performance_daily
+						WHERE
+							SHARE_CREATE_TIME IS NOT NULL
+					) AS SHARE_SKU
+				GROUP BY
+					SHARE_SKU.OWNER_ID
+			) AS B,
+			(
+				SELECT
+					SHARE_COUNT.OWNER_ID,
+					COUNT(SHARE_COUNT.OWNER_ID) COUNT
+				FROM
+					(
+						SELECT DISTINCT
+							(SHARE_ID),
+							OWNER_ID
+						FROM
+							t_ext_yxd_sales_performance_daily
+						WHERE
+							SHARE_CREATE_TIME IS NOT NULL
+					) AS SHARE_COUNT
+				GROUP BY
+					SHARE_COUNT.OWNER_ID
+			) AS C
+		WHERE
+			A.OWNER_ID = B.OWNER_ID
+		AND A.OWNER_ID = C.OWNER_ID
+		ORDER BY
+			C.COUNT DESC
+	) Q
+FULL JOIN (
+	SELECT
+		D.MERCHANT_BACKURL,
+		E.sum_sal_price_own,
+		E.order_count_own,
+		F.sum_sal_price_other,
+		F.order_count_other,
+		D.YXD_ORG_PROVINCE_NAME,
+		D.YXD_ORG_CITY_NAME,
+		D.YXD_ORG_AREA_NAME,
+		D.YXD_ORG_TOWN_NAME
+	FROM
+		(
+			SELECT
+				*
+			FROM
+				(
+					SELECT
+						ROW_NUMBER () OVER (
+							PARTITION BY MERCHANT_BACKURL
+							ORDER BY
+								PAY_TIME DESC
+						) rowId ,*
+					FROM
+						t_ext_ctoc_order_item
+					WHERE
+						KEY_BUSINESS_ID = 11
+					AND (
+						SHARE_BUY_FLAG = 2
+						OR SHARE_BUY_FLAG = 1
+					)
+					AND (
+						ORDER_STATUS_ID > 3
+						OR ORDER_SUBSTATUS_ID IN (105, 108)
+					) @@@
+				) AS PERFORMANCE
+			WHERE
+				rowId = 1
+		) AS D
+	LEFT JOIN (
+		SELECT
+			MERCHANT_BACKURL,
+			SUM(ORDER_ITEM_TOTAL_PRICE) sum_sal_price_own,
+			COUNT(DISTINCT esc_orderid) order_count_own
+		FROM
+			t_ext_ctoc_order_item
+		WHERE
+			KEY_BUSINESS_ID = 11
+		AND SHARE_BUY_FLAG = 1
+		AND (
+			order_status_id > 3
+			OR order_substatus_id IN (105, 108)
+		)
+		GROUP BY
+			MERCHANT_BACKURL
+	) AS E ON E.MERCHANT_BACKURL = D.MERCHANT_BACKURL
+	LEFT JOIN (
+		SELECT
+			MERCHANT_BACKURL,
+			SUM(ORDER_ITEM_TOTAL_PRICE) sum_sal_price_other,
+			COUNT(DISTINCT esc_orderid) order_count_other
+		FROM
+			t_ext_ctoc_order_item
+		WHERE
+			KEY_BUSINESS_ID = 11
+		AND SHARE_BUY_FLAG = 2
+		AND (
+			order_status_id > 3
+			OR order_substatus_id IN (105, 108)
+		)
+		GROUP BY
+			MERCHANT_BACKURL
+	) AS F ON D.MERCHANT_BACKURL = F.MERCHANT_BACKURL
+) W ON W.MERCHANT_BACKURL = Q.owner_id
+ORDER BY
+	COUNT DESC,
+	OWNER_ID DESC

@@ -1,0 +1,135 @@
+﻿scp /data/logs/search/hivedata/se_recommend_keyword_data\20170227 web@172.25.156.90:/data/logs/search/hivedata/se_recommend_keyword_data\
+
+
+load data local inpath '/data/logs/search/hivedata/se_recommend_keyword_data/20170226' into table se_recommend_keyword_data
+
+
+CREATE TABLE IF NOT EXISTS search.se_recommend_keyword_data(users string,item string,value bigint,hour string,stamp string,dictflag tinyint) ROW FORMAT DELIMITED FIELDS TERMINATED BY '|' STORED AS TEXTFILE;
+
+
+Main.hiveCommon("hiverecocal","-a","-668");
+
+172.25.201.59
+
+
+0 0 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k startRelevantKeyWord
+5 7 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k startSuggestKeyWord
+2 2 * * 7 /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k cleanKeyword
+0 6 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k recommenddata -i -1 rz recommend
+0 2 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hive
+
+
+0 0 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k startRelevantKeyWord
+5 7 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k startSuggestKeyWord
+2 2 * * 7 /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k cleanKeyword
+0 6 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k recommenddata -i -1 rz recommend
+0 2 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hive
+
+* 11 * * 1 /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data/postmall/seToolBox/seToolBox.jar -k siteMap
+
+
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k recommenddata -i -1 rz recommend_keyword
+
+
+588324
+
+
+
+args = new String[]{"-k", "hiverecocal", "-i", "20170226"};//{"-k", "recommenddata", "-i", "-1", "rz","recommend"};//{"-k","hive","-a","668"};
+
+
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -i 20170226 &
+
+
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -i 20150625 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -i 20150625 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -i 20150625 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -i 20150625 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1291 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1090 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1081 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1074 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1070 &
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1066 &
+/usr/local/jdk1.8/bin/java -Xms2048m -Xmx2048m -Xss512k  -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1056 &
+/usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k  -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1050 &
+/usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k  -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1056 &
+
+  nohup    /usr/local/jdk1/bin/java -jar /data/postmall/uleDataSync_HK/dataSync-HKA.jar -k startListingListener &>/dev/null &
+  
+nohup  /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k recommenddata -i -1 rz recommend_keyword 2>/dev/null 1>&2 &
+
+
+
+nohup /usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k  -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1050 2>/dev/null 1>&2 &
+nohup /usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k  -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a --265 2>/dev/null 1>&2 &
+
+nohup /usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k  -jar /data/postmall/seToolBox/seToolBox.jar -k hive -a -300 2>/dev/null 1>&2 &
+
+
+nohup  /usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k -jar /data/postmall/seToolBox/seToolBox.jar -k recommenddata -i -1 rz recommend_keyword 2>/dev/null 1>&2 &
+
+nohup  /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data/postmall/seToolBox/seToolBox.jar -k KCRAnalystStep1 -i 1  2>/dev/null 1>&2 &
+
+/usr/local/jdk1.8/bin/java -Xms1024m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k KCRAnalystStep2
+nohup  /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data/postmall/seToolBox/seToolBox.jar -k KCRAnalystStep2  2>/dev/null 1>&2 &
+
+
+
+nohup  /usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k -jar /data/postmall/seToolBox/seToolBox.jar -k KCRAnalystStep1 -i 0  2>/dev/null 1>&2 &
+
+nohup /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data/postmall/seToolBox/seToolBox.jar -k KCRAnalystStep2  2>/dev/null 1>&2 &
+
+nohup /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data/postmall/seToolBox/seToolBox.jar -k KCRAnalystStep4  2>/dev/null 1>&2 &
+
+
+
+
+/usr/local/jdk1.8/bin/jstack 60442 > /tmp/jstack3.txt
+/usr/local/jdk1.8/bin/jstat -gc 60442 1000 5 > /tmp/jstat-gc3.txt  
+/usr/local/jdk1.8/bin/jstat -gcutil 60442 1000 5 > /tmp/jstat-gcutil3.txt
+/usr/local/jdk1.8/bin/jmap -heap 60442 > /tmp/jmap-headp3.txt         堆内存 占用情况
+/usr/local/jdk1.8/bin/jmap -histo:live 60442 > /tmp/jmap-histo3.txt 
+
+
+"-k", "hiverecocal", "-a", "-1291"
+
+
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -i 20150625 &
+
+/usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k siteMap
+
+* 23 * * 1 /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data/postmall/seToolBox/seToolBox.jar -k siteMap
+
+
+//生产脚本命令
+
+# m h  dom mon dow   command
+#search ulemall.DataSyncCenter
+#0 6 * * * /usr/bin/java -jar /data/postmall/search/ulemall.DataSyncCenter/ulemall.DataSyncCenter.jar -k startSalesVolumeCounter
+#0 5 * * * /usr/bin/java -jar /data/postmall/search/ulemall.DataSyncCenter/ulemall.DataSyncCenter.jar -k startLowPriceFlagCounter
+#0 1 * * * /usr/bin/java -jar  /data/postmall/search/ulemall.DataSyncCenter/ulemall.DataSyncCenter.jar -k startCommentCounter
+
+0 1 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -Dhttps.proxyHost=proxy.prd.uledns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k startRelevantKeyWord
+# 初始化listing keywords
+5 0 * * * /usr/local/jdk1.8/bin/java -Xms1g -Xmx1g -jar /data/postmall/seToolBox/seToolBox.jar -k migrateKeywordsIntoFile
+# 昨日已购redis推送
+30 0 * * * /usr/local/jdk1.8/bin/java -Xms1g -Xmx1g -jar /data/postmall/seToolBox/seToolBox.jar -k purchaseBehaviorAnalyzeDaily
+35 0 * * * /usr/local/jdk1.8/bin/java -Xms1g -Xmx1g -jar /data/postmall/seToolBox/seToolBox.jar -k updateCorrectWordFrequency_999
+#5 7 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k startSuggestKeyWord
+#2 2 * * 7 /usr/local/jdk1.8/bin/java  -jar /data/postmall/seToolBox/seToolBox.jar -k cleanKeyword
+10 0 * * * /usr/local/jdk1.8/bin/java -Dhttps.proxyHost=proxy.prd.uledns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k generatePinyinErrors
+#0 6 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k recommenddata -i -1 rz recommend
+#0 2 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hive
+0 4 * * 1 /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -Dhttps.proxyHost=proxy.prd.uledns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k siteMap
+#Ansible: 定时删除日志
+1 4 * * * find /data/logs/ -type f -user web -mtime +15 -exec rm -f {} \;
+#定时更新邮乐商城分词词典
+0 3 * * * /bin/bash /home/web/updateDic.sh
+
+# 同步siteMap
+1 0 * * 1  /usr/bin/rsync -az /data/postmall/seToolBox/data/siteMap/ 172.25.188.218:/data/nginx/static/wwwroot/ >> /data/logs/crond/sitemap.log 2>&1
+1 0 * * 1  /usr/bin/rsync -az /data/postmall/seToolBox/data/siteMap/ 172.25.188.220:/data/nginx/static/wwwroot/ >> /data/logs/crond/sitemap.log 2>&1
+
+
+0 1 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -Dule.module=search_sphinx -Dule.app=seToolBox -Dhttps.proxyHost=proxy.prd.uledns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k SearchSumKeyword

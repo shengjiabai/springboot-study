@@ -55,7 +55,7 @@ args = new String[]{"-k", "hiverecocal", "-i", "20170226"};//{"-k", "recommendda
 /usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k  -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1050 &
 /usr/local/jdk1.8/bin/java  -server -Xms2048m -Xmx2048m -Xss512k  -jar /data/postmall/seToolBox/seToolBox.jar -k hiverecocal -a -1056 &
 
-  nohup    /usr/local/jdk1/bin/java -jar /data/postmall/uleDataSync_HK/dataSync-HKA.jar -k startListingListener &>/dev/null &
+  nohup    /usr/local/jdk1/bin/java -jar /data/postmall/DataSync_HK/dataSync-HKA.jar -k startListingListener &>/dev/null &
   
 nohup  /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k recommenddata -i -1 rz recommend_keyword 2>/dev/null 1>&2 &
 
@@ -105,12 +105,12 @@ nohup /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data
 //生产脚本命令
 
 # m h  dom mon dow   command
-#search ulemall.DataSyncCenter
-#0 6 * * * /usr/bin/java -jar /data/postmall/search/ulemall.DataSyncCenter/ulemall.DataSyncCenter.jar -k startSalesVolumeCounter
-#0 5 * * * /usr/bin/java -jar /data/postmall/search/ulemall.DataSyncCenter/ulemall.DataSyncCenter.jar -k startLowPriceFlagCounter
-#0 1 * * * /usr/bin/java -jar  /data/postmall/search/ulemall.DataSyncCenter/ulemall.DataSyncCenter.jar -k startCommentCounter
+#search mall.DataSyncCenter
+#0 6 * * * /usr/bin/java -jar /data/postmall/search/mall.DataSyncCenter/mall.DataSyncCenter.jar -k startSalesVolumeCounter
+#0 5 * * * /usr/bin/java -jar /data/postmall/search/mall.DataSyncCenter/mall.DataSyncCenter.jar -k startLowPriceFlagCounter
+#0 1 * * * /usr/bin/java -jar  /data/postmall/search/mall.DataSyncCenter/mall.DataSyncCenter.jar -k startCommentCounter
 
-0 1 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -Dhttps.proxyHost=proxy.prd.uledns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k startRelevantKeyWord
+0 1 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -Dhttps.proxyHost=proxy.prd.dns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k startRelevantKeyWord
 # 初始化listing keywords
 5 0 * * * /usr/local/jdk1.8/bin/java -Xms1g -Xmx1g -jar /data/postmall/seToolBox/seToolBox.jar -k migrateKeywordsIntoFile
 # 昨日已购redis推送
@@ -118,13 +118,13 @@ nohup /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data
 35 0 * * * /usr/local/jdk1.8/bin/java -Xms1g -Xmx1g -jar /data/postmall/seToolBox/seToolBox.jar -k updateCorrectWordFrequency_999
 #5 7 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k startSuggestKeyWord
 #2 2 * * 7 /usr/local/jdk1.8/bin/java  -jar /data/postmall/seToolBox/seToolBox.jar -k cleanKeyword
-10 0 * * * /usr/local/jdk1.8/bin/java -Dhttps.proxyHost=proxy.prd.uledns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k generatePinyinErrors
+10 0 * * * /usr/local/jdk1.8/bin/java -Dhttps.proxyHost=proxy.prd.dns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k generatePinyinErrors
 #0 6 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k recommenddata -i -1 rz recommend
 #0 2 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -jar /data/postmall/seToolBox/seToolBox.jar -k hive
-0 4 * * 1 /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -Dhttps.proxyHost=proxy.prd.uledns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k siteMap
+0 4 * * 1 /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -Dhttps.proxyHost=proxy.prd.dns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k siteMap
 #Ansible: 定时删除日志
 1 4 * * * find /data/logs/ -type f -user web -mtime +15 -exec rm -f {} \;
-#定时更新邮乐商城分词词典
+#定时更新商城分词词典
 0 3 * * * /bin/bash /home/web/updateDic.sh
 
 # 同步siteMap
@@ -132,4 +132,4 @@ nohup /usr/local/jdk1.8/bin/java -server -Xms2048m -Xmx2048m -Xss512k -jar /data
 1 0 * * 1  /usr/bin/rsync -az /data/postmall/seToolBox/data/siteMap/ 172.25.188.220:/data/nginx/static/wwwroot/ >> /data/logs/crond/sitemap.log 2>&1
 
 
-0 1 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -Dule.module=search_sphinx -Dule.app=seToolBox -Dhttps.proxyHost=proxy.prd.uledns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k SearchSumKeyword
+0 1 * * * /usr/local/jdk1.8/bin/java -Xms256m -Xmx1024m -D.module=search_sphinx -D.app=seToolBox -Dhttps.proxyHost=proxy.prd.dns.com -Dhttps.proxyPort=443 -jar /data/postmall/seToolBox/seToolBox.jar -k SearchSumKeyword

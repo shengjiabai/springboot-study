@@ -136,7 +136,7 @@ ribbon:
 15.代理代码
  public static void withoutEnvHttpClient() throws IOException {
         HttpHost target = new HttpHost("bizapi.jd.com", 443, "https");
-        HttpHost proxy = new HttpHost("proxy.beta.uledns.com", 443);
+        HttpHost proxy = new HttpHost("proxy.beta.xydns.com", 443);
         RequestConfig config = RequestConfig.custom()
                 .setProxy(proxy)
                 .build();

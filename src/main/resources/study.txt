@@ -1779,6 +1779,8 @@ Cloud Sleuth 正是解决这个问题，它在日志中引入唯一 ID，以保�
     （8）destroy-method：
       最后，如果这个Bean的Spring配置中配置了destroy-method属性，会自动调用其配置的销毁方法。
 
+https://dpb-bobokaoya-sm.blog.csdn.net/article/details/88143169#comments_15962953 写的很好的一篇文章
+
 150.jdk1.8对并发方面的优化你知道吗？
 答：1. LongAdder（啊大）：热点分离类似于有锁操作中的“减小锁粒度”，将一个锁分离成若干个锁来提高性能。在无锁中，也可以用类似的方式来增加CAS的成功率，从而提高性能。
       a.AtomicLong高并发下CAS的失败几率更高， 重试次数更多，越多线程重试，CAS失败几率又越高，变成恶性循环，AtomicLong效率降低。

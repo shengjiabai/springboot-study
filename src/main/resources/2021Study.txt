@@ -1,0 +1,257 @@
+1.延时队列 
+  a.jdk timer
+  b.jdk ScheduledThreadPoolExecutor ScheduledExecutorService
+  d.jdk DelayQueue 对象必须实现Delayed接口 重新compare  通过入队列的时间 和当前时间倒计时 谁先达到执行谁的
+  f.TimingWheel 时间轮 时间轮，是一种实现延迟功能（定时器）的巧妙算法，在Netty，Zookeeper，Kafka等各种框架中，甚至Linux内核中都有用到。
+    https://blog.csdn.net/uxiAD7442KMy1X86DtM3/article/details/109233656
+
+2.MySQL find_in_set函数的语法
+  a. FIND_IN_SET(str,strlist) str 要查询的字符串  strlist 字段名 参数以”,”分隔 如 (1,2,6,8)
+    查询字段(strlist)中包含(str)的结果，返回结果为null或记录    
+  b.find_in_set()和like的区别：
+     INSERT INTO users(name, limits) VALUES('小张','1,2,12'); 
+     INSERT INTO users(name, limits) VALUES('小王','11,22,32');
+     SELECT * FROM users WHERE limits LIKE '%2%';  2条记录都会出来
+     SELECT * FROM users WHERE FIND_IN_SET(2,limits); 只会出来第一条更加精准
+     
+3.不会有重复值时使用UNION而不是UNION ALL 
+   a. UNION 会把两个结果集的所有数据放到临时表中后再进行去重操作
+   b. UNION ALL 不会再对结果集进行去重操作       
+   https://www.w3school.com.cn/sql/sql_union.asp
+ 
+4.拆分大sql变为小sql
+   a. 大SQL:逻辑上比较复杂，需要占用大量CPU进行计算的SQL
+   b.MySQL 一个SQL只能使用一个CPU进行计算
+   c.SQL拆分后可以通过并行执行来提高处理效率
+   
+5.Mysql性能优化：什么是索引下推？
+  a.索引下推（index condition pushdown ）简称ICP，在Mysql5.6的版本上推出，用于优化查询。
+  b.在使用ICP的情况下，如果存在某些被索引的列的判断条件时，MySQL服务器将这一部分判断条件传递给存储引擎，然后由存储引擎通过判断索引是否符合MySQL服务器传递的条件，只有当索引符合条件时才会将数据检索出来返回给MySQL服务器 。
+  c.索引条件下推优化可以减少存储引擎查询基础表的次数，也可以减少MySQL服务器从存储引擎接收数据的次数。
+  d.explain解析结果可以看出Extra的值为Using index condition，表示已经使用了索引下推。
+一句话总结：索引条件下推就是尽量利用索引信息，来尽可量的减少回表的次数（哪怕不符合最左匹配原则），即减少随机I/O的开销。 
+   a.索引下推在非主键索引上的优化，可以有效减少回表的次数，大大提升了查询的效率。  
+  eg：一张表，建立联合索引（name，age）
+        SELECT * from user where  name like '陈%'
+      a.根据 "最佳左前缀" 的原则，这里使用了联合索引（name，age）进行了查询，性能要比全表扫描肯定要高。
+      b.问题来了，如果有其他的条件呢？假设又有一个需求，要求匹配姓名第一个字为陈，年龄为20岁的用户，此时的sql语句如下：
+            SELECT * from user where  name like '陈%' and age=20
+      这条sql语句应该如何执行呢？下面对Mysql5.6之前版本和之后版本进行分析。
+      Mysql5.6之前版本：忽略age这个字段，直接通过name进行查询，在(name,age)这课树上查找到了两个结果，id分别为2,1，
+                      然后拿着取到的id值一次次的回表查询，因此这个过程需要回表两次。
+      Mysql5.6之后版本：5.6版本添加了索引下推这个优化
+          InnoDB并没有忽略age这个字段，而是在索引内部就判断了age是否等于20，对于不等于20的记录直接跳过，因此在(name,age)这棵索引树中只匹配到了一个记录，
+          此时拿着这个id去主键索引树中回表查询全部数据，这个过程只需要回表一次。
+      https://www.cnblogs.com/Chenjiabing/p/12600926.html
+   
+6.mysql 集群方案：mmm mycat Replication
+ a.phxSql 高性能：由于Proxy接管了MySQL Client的请求，为了使整个集群的读写性能接近单机MySQL，Proxy使用协程模型提高自身的处理能力。
+ 
+7.MySQL在建表时如果没有指定主键会怎么样？
+ a.innoDb会自动建一个不可见、长度为6字节的row_id,，而且InnoDB维护了一个全局的dictsys.row_id，所以未定义主键的表都会共享该row_id，每次插入一条数据都把全局row_id当成主键id，然后全局row_id加1。
+ b.该全局row_id在代码实现上使用的事bigint unsigned类型，但实际上只给row_id保留了6字节，所以这种设计就会存在一个问题：如果全局row_id一直涨，
+   直到2的48次幂-1时，这个时候再加1，row_id的低48位都会变为0，如果再插入新一行数据时，拿到的row_id就为0，
+   这样的话就存在主键冲突的可能，所以为了避免这种隐患，每个表都需要一个主键。
+   
+8.linux查看某个时间段的日志?
+ cat /data/logs/prd/front-order-api.log |sed -n '/2021-05-31 12:12:00/,/2021-05-31 12:50:00/p' 
+ 
+9.注册中心对比
+    服务注册与发现框架	CAP模型	控制台管理	社区活跃度
+    Eureka	                AP  	支持	低2.X版本闭源
+    Zookeeper	            CP	    不支持	中
+    Consul	                CP	    支持	高
+    Nacos	            AP、CP	    支持	高     
+   
+10.栈上分配：将堆分配转化为栈分配
+   a.在方法内创建对象，并且这个对象没有发生逃逸，就会被分配在栈上。
+   b.JIT编译器在编译期间根据逃逸分析的结果，发现如果一个对象并没有逃逸出方法的话，就可能被优化成栈上分配。分配完成后，继续在调用栈内执行，r最后线程结束，
+     栈空间被回收，局部变量对象也被回收。这样就无须进行垃圾回收了。 
+   
+   开启逃逸分析 (-XX:+DoEscapeAnalysis)
+   逃逸分析的作用就是分析对象的作用域是否会逃逸出方法之外，在server虚拟机模式下才可以开启（jdk1.6默认开启）
+   开启标量替换 (-XX:+EliminateAllocations)
+   标量替换的作用是允许将对象根据属性打散后分配在栈上，比如若一个对象拥有两个字段，会将这两个字段视作局部变量进行分配。默认该配置为开启
+
+   原文链接：https://blog.csdn.net/ouyang2018/article/details/101921360
+     
+     
+  
+11.jvm为什么把-Xms和-Xmx的值设置成一样
+   -Xms: 指定虚拟机堆内存初始值大小
+   -Xmx: 指定虚拟机堆内存最大值大小
+   把两者设置为一致,是为了避免频繁扩容和GC释放堆内存造成的系统开销/压力       
+    
+12.32个java面试比考点
+  https://blog.csdn.net/werqerwer?t=1    
+ 
+13.java设计模式
+   java设计模式，按照模式的应用目标分类，设计模式可分为创建型模式、结构型模式和行为模式
+   1.创建型模式，是指对对象创建过程的各种问题和解决方案的总结，包括各种工厂模式factory、abstractFactory，单例模式 singleton，构建器模式builder，原型模式protoType；
+   2.结构型模式，是针对软件设计结构的总结，关注类、对象继承、组合方式的实践经验。常见的结构型模式，包括桥接模式bridge、适配器模式adapter、装饰者模式decorator、代理模式proxy、组合模式composite、外观模式facade、享元模式fluweight等；
+   3.行为模式，是从类或对象之间交互、职责划分等角度总结的模式。比较常见的行为模式有策略模式strategy，解释器模式interpreter、命令模式command、观察者模式observer、迭代器模式iterator、模板方法模式templateMethod、访问者模式visitor   
+ 
+14.nacos集群的ap cp切换      https://blog.csdn.net/weixin_39605835/article/details/111169477
+
+   a.nacos中的协议distro(di si che) 
+       Distro
+       在Nacos的Instance(实例)中提供了一个ephemeral字段，这个字段是bool类型，这个字段和ZK中的含义差不多，都代表的是否是临时节点，
+       在Nacos中如果是临时节点就会使用AP协议，如果不是临时节点就会走CP。当然在注册中心中所有的实例其实默认都是临时节点。
+   b.Nacos中为了实现AP，自己定制了一套Distro协议。下面我们分析一下Distro到底是什么：
+     1.纯内存保存数据操作
+     2.如果有一个节点挂了如何保存数据，提供load 在DistroConsistencyService的load方法中，我们遍历所有的非自己的Server，然后将数据进行同步，如果其中某一个同步成功了，那就不需要向其他的Server发出同步信息，。这样就可以将数据全部恢复。         
+     3.如何保证最终一致
+       虽然我们说的是AP，但是其实我们还是需要保证最终一致，防止长时间各个节点数据不一致，在DistroConsistencyService的Put方法中会对TaskDispatcher添加一个任务
+       a.在task里面并不是实时更新数据，这样效率低。有个默认阀值1000条 到1000条批量发送消息更新
+       b.或者是距离上次消息更新间隔2s发送消息 这里的发送也是生成一个SyncTask然后放到线程池中进行异步发送。
+       如果发送一个消息过去，正好那个节点挂了 数据丢了怎么办
+       兜底策略：TimedSync，这个任务每5s会执行一次 这里并不是同步所有的数据，而是遍历所有的数据，将属于自己管理那部分数据才会同步(什么数据才属于自己管理呢？下个小节会细讲)，然后获取所有的非自己的Server将这些数据进行check发送。
+     4.通过这两种方式：实时的更新和定时的更新我们就可以保证所有的Nacos节点上的数据最后都是最终一致。       
+     ZK的一个缺点就是无法进行水平扩展，这个是CP的一大问题随着公司的发展，规模变大之后，你很难在撑起现在的业务了。在Distro中没有Leader这个角色，每个节点都可以处理读写，通过这样的方式，我们可以任意的水平扩展Nacos的节点来完成我们的需要。
+     过滤器 key hash 判断是否自己处理
+
+15.,zuul中提供了三种类型的Filter,preFilter,routeFilter和postFilter,分别对应请求中的不同的阶段,针对同一个请求,有一个RequestContext对象,在三个阶段的Filter中进行共享     
+     
+16.为啥分表分库：
+答：1.单表 数据量太大，读写性能会下降，即使有索引，索引也会变的很大，性能同样会下降
+    2.数据文件会变的很大，数据备份和恢复会耗很长时间
+    3.数据文件越大，极端情况下丢数据的风险越高（例如，机房火灾导致数据库主备机都发生故障）。
+  基于上述原因，单个数据库服务器存储的数据量不能太大，需要控制在一定的范围内。为了满足业务数据存储的需求，就需要将存储分散到多台数据库服务器上。    
+    
+17.如何提升系统的并发能力?
+答：垂直扩展（Scale Up）与水平扩展（Scale Out）
+  垂直扩展：提升单机处理能力
+    （1）增强单机硬件性能，例如：增加CPU核数如32核，升级更好的网卡如万兆，升级更好的硬盘如SSD，扩充硬盘容量如2T，扩充系统内存如128G；
+    （2）提升单机架构性能，例如：使用Cache来减少IO次数，使用异步来增加单服务吞吐量，使用无锁数据结构来减少响应时间；
+  水平扩展：只要增加服务器数量，就能线性扩充系统性能。
+
+18.spring项目多数据源配置？ 配置DataSource  在mybatis的sqlsSessionFactory注入数据源（ extends BaseMapperScannerConfigure 设置扫描的包、xml文件存放位置） 
+解：数据源配置其核心是配置DataSource
+   1.每个数据源单独配置一个DataSource 然后通过别名申明 DataSource bean
+        @Bean(name = "orderDatasource")
+        public DataSource orderDatasource() {
+            return getDataSource(orderDatasourceDto);
+        }
+        
+        @Bean(name = "commonDatasource")
+        public DataSource orderDatasource() {
+            return getDataSource(commonDatasourceDto);
+        }
+
+       private DataSource getDataSource(DataSourcePropertiesDto propertiesDto) {
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setDriverClassName(propertiesDto.getDriverClassName());
+        dataSource.setUrl(propertiesDto.getUrl());
+        dataSource.setUsername(propertiesDto.getUsername());
+        dataSource.setPassword(propertiesDto.getPassword());
+        dataSource.setMaxActive(druidConfigDto.getMaxActive());
+        dataSource.setInitialSize(druidConfigDto.getInitialSize());
+        dataSource.setMaxWait(druidConfigDto.getMaxWait());
+        dataSource.setMinIdle(druidConfigDto.getMinIdle());
+        dataSource.setTimeBetweenEvictionRunsMillis(druidConfigDto.getTimeBetweenEvictionRunsMillis());
+        dataSource.setMinEvictableIdleTimeMillis(druidConfigDto.getMinEvictableIdleTimeMillis());
+        dataSource.setValidationQuery(druidConfigDto.getValidationQuery());
+        dataSource.setTestWhileIdle(druidConfigDto.getTestWhileIdle());
+        dataSource.setTestOnBorrow(druidConfigDto.getTestOnBorrow());
+        dataSource.setTestOnReturn(druidConfigDto.getTestOnReturn());
+        dataSource.setMaxOpenPreparedStatements(druidConfigDto.getMaxOpenPreparedStatements());
+        dataSource.setRemoveAbandoned(druidConfigDto.getRemoveAbandoned());
+        dataSource.setRemoveAbandonedTimeout(druidConfigDto.getRemoveAbandonedTimeout());
+        dataSource.setName("datasource_" + propertiesDto.getClass().getSimpleName());
+        //新增保存表情符号等特殊字段
+        List<String> initSqls = Lists.newArrayList();
+        initSqls.add("set names utf8mb4;");
+        dataSource.setConnectionInitSqls(initSqls);
+        return dataSource;
+    }
+   2.多个数据源，需要配置多个MapperScannerConfigurer 
+     a.将第一步申明出来的dataSource 注入到SqlSessionFactory 
+     b.继承BaseMapperScannerConfigure 设置扫明的包和xml文件路劲
+     @Configuration
+     @MapperScan(basePackages = {
+             OrderMapperScannerConfigurer.DAO_PACKAGE,
+             OrderMapperScannerConfigurer.AFTERSALE_PACKAGE,
+             OrderMapperScannerConfigurer.DAO_PACKAGE_OPEN_API
+         }, sqlSessionFactoryRef = "orderSqlSessionFactory")
+     public class OrderMapperScannerConfigurer extends BaseMapperScannerConfigure {
+         static final String DAO_PACKAGE = "com.dffl.order.dao";
+         static final String MAPPER_LOCATION = "classpath*:com/dffl/order/sqlMapper/*.xml";
+         static final String AFTERSALE_PACKAGE = "com.dffl.aftersale.dao";
+         static final String AFTERSALE_MAPPER_LOCATION = "classpath*:com/dffl/aftersale/sqlMapper/*.xml";
+         static final String DAO_PACKAGE_OPEN_API = "com.dffl.openapi.dao";
+         static final String MAPPER_LOCATION_OPEN_API = "classpath*:com/dffl/openapi/sqlMapper/*.xml";
+         @Bean(name = "orderSqlSessionFactory")
+         public SqlSessionFactory orderSqlSessionFactory(@Qualifier("orderDatasource") DataSource orderDatasource)
+                 throws Exception {
+             return getSqlSessionFactory(orderDatasource);
+         }
+     
+         @Override
+         protected List<String> getMapperLocationsConfig() {
+             List<String> mapperLocations = Lists.newArrayList();
+             mapperLocations.add(OrderMapperScannerConfigurer.MAPPER_LOCATION);
+             mapperLocations.add(OrderMapperScannerConfigurer.AFTERSALE_MAPPER_LOCATION);
+             mapperLocations.add(OrderMapperScannerConfigurer.MAPPER_LOCATION_OPEN_API);
+             return mapperLocations;
+     
+         }
+     }
+   3.事务配置：在配置DataSource的时候可以配置事务 DataSourceTransactionManager 多份事务也是通过别名来申明bean
+    @Bean(name = "orderTransactionManager")
+       public DataSourceTransactionManager orderTransactionManager() {
+           return new DataSourceTransactionManager(orderDatasource());
+    }
+     具体使用：如果存在多个事务驱动 在spring使用的时候必须申明用的是那个事务驱动 通过bean别名
+     
+     @Transactional(value = "orderTransactionManager", rollbackFor = Exception.class)
+
+19.BeanFactoryPostProcessor BeanPostProcessor InstantiationAwareBeanPostProcessor 
+    * 三者的区别：
+    *  1.BeanFactoryPostProcessor是在所有的bean实例化对象之前执行，该接口中的方法是最先执行的
+    *    postProcessBeanFactory（）中可以获取的所有的bean 可以对bean的属性进行修改,修改Bean中元数据中的信息。
+    *  2.BeanPostProcessor  该接口中定义了两个方法，分别在Bean对象实例化及装配后在初始化的前后执行
+    *    BeforeInitialization AfterInitialization
+    *  3.InstantiationAwareBeanPostProcessor接口
+    *   该接口是BeanPostProcessor接口的子接口，所以该接口肯定具有BeanPostProcessor接口的功能，
+    *   同时又定义了三个自己的接口，这三个接口是在Bean实例化前后执行的方法。  
+    *   
+    *   postProcessAfterInitialization bean实例化，初始化了
+    *   postProcessAfterInstantiation  bean实例化，没有初始化了
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 

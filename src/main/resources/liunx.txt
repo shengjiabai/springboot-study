@@ -1,0 +1,12 @@
+1.Linux中的远程复制，scp命令，可以复制文件夹
+  a.从本地复制到远程： scp /home/daisy/full.tar.gz root@172.19.2.75:/home/root 
+  
+  用法： scp {要复制的文件位置，可以是相对路径} {远程机器账号}@{远程机器ip}:{远程机器中的目标文件夹目录}
+  复制目录加参数 -r 即可 
+  
+  b.从 远程 复制到 本地 :scp root@172.19.2.75:/home/root/full.tar.gz /home/daisy/full.tar.gz
+
+2.查看磁盘空间大小的命令：df -hl  查看文件和目录大小的命令：du  du -h *     du -sh *
+
+3.删除日志文件  sudo /dev/null > /var/log/**.log 
+  

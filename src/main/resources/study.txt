@@ -972,6 +972,11 @@ jdk动态代理: https://blog.csdn.net/qq30211478/article/details/77862121
 						组成一个链表+>两把锁+两个条件
                         默认容量为整数最大值，可以看做没有容量限制
 	三种入队与三种出队与上边完全一样，只是由于LinkedBlockingQueue的的容量无限，在入队过程中，没有阻塞等待
+	
+	DelayQueue是Delayed元素的一个无界阻塞队列，只有在延迟期满时才能从中提取元素。队列中对象的顺序按到期时间进行排序。
+    优点：开发简单，效率高，任务触发时间延迟低；
+    缺点：服务器重启后，数据会丢失，要满足高可用场景，需要hook线程二次开发；宕机的担忧；如果数据量暴增，也会引起OOM的情况产生。
+	
 60.类在虚拟机中的加载过程？	
 答：加载class文件
 	验证class文件是否满足虚拟机要求 
@@ -1492,7 +1497,9 @@ Zookeeper 主要用于在集群中不同节点之间进行通信
       impossible where 表示用不着where，一般就是没查出来啥。 
       Using filesort mysql会对数据使用一个外部的索引排序，而不是按照表内的数据索引排序，这个的优化（MySQL中无法利用索引完成的排序操作称为“文件排序”）当我们试图对一个没有索引的字段进行排序时，就是filesoft。它跟文件没有任何关系，实际上是内部的一个快速排序。 	 	
 	  Using temporary：表示MySQL需要使用临时表来存储结果集，常见于排序和分组查询，常见 group by ; order by
-	  
+	  &&Using index condition：在5.6版本后加入的新特性（Index Condition Pushdown）;
+       Using index condition 会先条件过滤索引，过滤完索引后找到所有符合索引条件的数据行，随后用 WHERE 子句中的其他条件去过滤这些数据行；
+       
 123.spring @Transactional事物不生效的场景？（@Transactional是声明式事务的注解，可以被标记在类上、接口、方法上。）
 答：1.数据库引擎是否设置合理，比如我们最常用的mysql，引擎MyISAM，是不支持事务操作的。需要改成InnoDB才能支持
     2.private、final、static方法，事务不生效，入口方法必须是public ,spring的AOp特性决定的，spring认为private自己用的方法应该自己控制，不应该用事务切进去	
@@ -1778,8 +1785,6 @@ Cloud Sleuth 正是解决这个问题，它在日志中引入唯一 ID，以保�
         当Bean不再需要时，会经过清理阶段，如果Bean实现了DisposableBean这个接口，会调用其实现的destroy()方法；
     （8）destroy-method：
       最后，如果这个Bean的Spring配置中配置了destroy-method属性，会自动调用其配置的销毁方法。
-
-https://dpb-bobokaoya-sm.blog.csdn.net/article/details/88143169#comments_15962953 写的很好的一篇文章
 
 150.jdk1.8对并发方面的优化你知道吗？
 答：1. LongAdder（啊大）：热点分离类似于有锁操作中的“减小锁粒度”，将一个锁分离成若干个锁来提高性能。在无锁中，也可以用类似的方式来增加CAS的成功率，从而提高性能。
@@ -2181,7 +2186,7 @@ grep -A 5 'defaultItem' np-item-war.log  | less   哈哈新学的 可以动态�
 https://zhuanlan.zhihu.com/p/179276937  好文章
 
 https://blog.csdn.net/thinkwon/category_9731418.html java面试题总结的很到位
-
+时间轮 - TimingWheel
 
 mysql执行计划？
 

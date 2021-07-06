@@ -87,6 +87,7 @@ springCloud没发注解代表什么？
 7.https://start.spring.io/actuator/info  springCloud和springboot版本对应关系
 
 8.dependencyManagement  和 dependencies区别?dependencyManagement父类项目申明了version 子项目中直接引用无需在写
+  dependencyManagement强制申明版本 
 
 
 9.开启热部署（compile 里面abcd都勾选）
@@ -172,9 +173,78 @@ ribbon:
 	
 17.spring cloud 使用zuul(过时)、 gateway（新一代网关服务） 	 gateway使用了webflux中的reactor-netty响应式组件，底层使用netty通讯框架。
 
+
+18.java程序启动参数 -D详解
+解：-D是用来在启动一个java程序时设置系统属性值的。如果该值是一个字符串且包含空格，那么需要包在一对双引号中。-Dfoo="some string" SomeClass
+    何为系统属性值呢？也就是在System类中通过getProperties()得到的一串系统属性。
+     System.out.print(System.getProperty("dubbo.token"));
+    JAVA -Ddubbo.token=666  TEST.JAR  
+    
+19.java -javaagent 参数  执行jar中的preMain方法  在jvm启动是执行高与main方法执行 
+解：1.avaAgent 的使用有涉及到这么几个关键字：
+      permain,Instrumentation,ClassFileTransformer,
+  jar包中MAINIFEST.MF 中的 Premain-Class指定preMain报名
+  2.对于在启动命令添加的-javaagent=xx.jar 如果有多个，加载顺序就是从前往后，且每一个-javaagent 都是独立的。
 	
+	另外的再说一种不去手动写MANIFREST.MF文件的方式，使用maven插件：
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.1.0</version>
+        <configuration>
+            <archive>
+                <!--自动添加META-INF/MANIFEST.MF -->
+                <manifest>
+                    <addClasspath>true</addClasspath>
+                </manifest>
+                <manifestEntries>
+                    <Premain-Class>com.rickiyang.learn.PreMainTraceAgent</Premain-Class>
+                    <Agent-Class>com.rickiyang.learn.PreMainTraceAgent</Agent-Class>
+                    <Can-Redefine-Classes>true</Can-Redefine-Classes>
+                    <Can-Retransform-Classes>true</Can-Retransform-Classes>
+                </manifestEntries>
+            </archive>
+        </configuration>
+    </plugin>
+    
+20.        
 	
 reactor 	 [化工] 反应器；[核] 反应堆；起反应的人
 Proactor  前摄器 主动器 前摄器模式 异步情况下
  涉及到事件分发器的两种模式称为：Reactor和Proactor。  Reactor模式是基于同步I/O的，而Proactor模式是和异步I/O相关的。 
+ 
+ 3 网关选型
+ Zuul：
+ 
+ 使用的是阻塞式的 API，不支持长连接，比如 websockets。
+ 底层是servlet，Zuul处理的是http请求。
+ 没有提供异步支持，流控等均由hystrix支持。
+ 依赖包spring-cloud-starter-netflix-zuul。
+ Gateway：
+ 
+ 底层依然是servlet，但使用了webflux，多嵌套了一层框架。
+ 依赖spring-boot-starter-webflux和/ spring-cloud-starter-gateway。
+ 提供了异步支持，提供了抽象负载均衡，提供了抽象流控，并默认实现了RedisRateLimiter。
+ 相同点：
+ 
+ 底层都是servlet。
+ 两者均是web网关，处理的是http请求。
+ 不同点：
+ 
+      内部实现：
+ 　　gateway对比zuul多依赖了spring-webflux，在spring的支持下，功能更强大，内部实现了限流、负载均衡等，扩展性也更强，但同时也限制了仅适合于Spring Cloud套件
+ 　　zuul则可以扩展至其他微服务框架中，其内部没有实现限流、负载均衡等。
+ 
+      是否支持异步
+ 　　zuul仅支持同步。
+ 　　gateway支持异步。理论上gateway则更适合于提高系统吞吐量（但不一定能有更好的性能），最终性能还需要通过严密的压测来决定
+       框架设计的角度。
+ 　　gateway具有更好的扩展性，并且其已经发布了2.0.0的RELESE版本，稳定性也是非常好的。
+ 
+       性能
+ 　　WebFlux 模块的名称是 spring-webflux，名称中的 Flux 来源于 Reactor 中的类 Flux。Spring webflux 有一个全新的非堵塞的函数式 Reactive Web 框架，可以用来构建异步的、非堵塞的、事件驱动的服务，在伸           缩 性方面表现非常好。使用非阻塞API。 Websockets得到支持，并且由于它与Spring紧密集成，所以将会是一个更好的 开发 体验。
+ 　   Zuul 1.x，是一个基于阻塞io的API Gateway。Zuul已经发布了Zuul 2.x，基于Netty，也是非阻塞的，支持长连接，但Spring Cloud暂时还没有整合计划。
+ 
+ 总结
+ 　　总的来说，在微服务架构，如果使用了Spring Cloud生态的基础组件，则Spring Cloud Gateway相比而言更加具备优势。
 	

@@ -220,6 +220,10 @@
 
 20.限流最完整的方案？https://mp.weixin.qq.com/s/j6-nWMxg9qimDUE9D8yk-A
 
+21.改变数据库表结构、添加字段，会锁表。导致所有更新操作停止一直在等待。直到表锁关闭
+   不改表结构如何动态扩展字段：`ext` VARCHAR(1000) NOT NULL DEFAULT '{}' COMMENT '扩展字段', 不支持加索引 myspl 5.8应该支持
+   
+
 
 
 

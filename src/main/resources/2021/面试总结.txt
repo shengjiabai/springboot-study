@@ -1,0 +1,1211 @@
+Java基础
+b=++a ;  结果b=a+1
+b=a++;   结果b=a
+
+Java中的值传递
+方法中的值是拷贝原先方法只所以，在方法内部是会改变的但是在方法外部还是原来的值
+int num1 = 10;
+int num2 = 20; // 方法内盖被这里不回变
+public static void swap(int num1, int num2){
+    System.out.println(num1)  // 可变
+}
+引用类型同理，对象不可变，但是引用的值可变
+Student s1 = new Student("小张");
+public static void swap(Student s1) {
+		s1 = new Student("小李");
+		System.out.println(s1.getName()); // 小李
+	}
+	System.out.println(s1.getName()); // 小张
+
+final
+首先是final对象不可更改，也可继承
+final还防止了指令重排序
+    1.final在写和读之间会有一个指令屏障，在构造函数内对一个 final 域的写入，与随后把这个被构造对象的引用赋值给一个引用变量，这两个操作之间不能重排序
+    2.final引用不能从构造函数中“溢出”，在构造函数完成之前，哪怕final对象已经被赋值，但是对其他线程仍然是不可见的
+    写final域：在编译器写final域完毕，构造体结束之前，会插入一个StoreStore屏障，保证前面的对final写入对其他线程/CPU可见，并阻止重排序
+    读final域：在上述规则2中，两步操作不能重排序的机理就是在读final域前插入了LoadLoad屏障
+
+String类为什么是final的
+为了实现字符串池
+为了线程安全
+为了实现String可以创建HashCode不可变性
+	
+StringBuilder线程安全的
+StringBuffer线程不安全的
+String a = "a" + "b"; 原理是new了个stringbuffer
+
+InputStream/Reader: 所有的输入流的基类，前者是字节输入流，后者是字符输入流。
+OutputStream/Writer: 所有输出流的基类，前者是字节输出流，后者是字符输出流。
+
+static
+静态方法是在调用的时候初始化
+静态方法块是在new对象的时候初始化
+静态代码块 -> 非静态代码块 -> 构造方法
+被 static 修饰的成员属于类，不属于单个这个类的某个对象，被类中所有对象共享。而 this 代表对本类对象的引用，指向本类对象；而 super 代表对父类对象的引用，指向父类对象；所以， this和super是属于对象范畴的东西，而静态方法是属于类范畴的东西。
+static只能被继承不能重写，就算你重写了调用的还是父类的方法
+
+JDK 动态代理和 CGLIB 动态代理对比
+1.JDK 动态代理只能只能代理实现了接口的类，而 CGLIB 可以代理未实现任何接口的类。 另外， CGLIB 动态代理是通过生成一个被代理类的子类来拦截被代理类的方法调用，因此不能代理声明为 final 类型的类和方法。
+2.就二者的效率来说，大部分情况都是 JDK 动态代理更优秀，随着 JDK 版本的升级，这个优势更加明显。
+
+@PostConstruct : 用来修饰方法，标记在项目启动的时候执行这个方法,一般用来执行某些初始化操作比如全局配置。PostConstruct 注解的方法会在构造函数之后执行,Servlet 的init()方法之前执行。
+@PreDestroy : 当 bean 被 Web 容器的时候被调用，一般用来释放 bean 所持有的资源。。@PreDestroy 注解的方法会在Servlet 的destroy()方法之前执行。
+
+tcp连接三次握手
+客户端想服务端发送syn=1（连接请求标记） seq=x（序列号）请求连接
+服务端接受到数据返回syn=1 seq=y（服务端序列号）ack=x+1（客户端序列号+1）表示接受到请求
+客户端返回 seq=x+1 ack=y+1 表示确认请求可以开始通讯
+
+tcp四次挥手过程
+客户端向服务端发送fin=1（关闭连接请求标记） seq=u 发送关闭请求
+服务端发送 ack = u+1 表示收到客户端发来的请求
+等待服务端数据完全发送完毕，发送seq=w ack=u+1 告诉客户端数据也已经传输完毕可以关闭
+客户端返回 seq=u+1 ack=w+1 表示收到 这时双方传输完毕 客户端进入timewait状态
+
+http又称短链接 
+
+netty
+bio 阻塞型 （1.4以前）
+nio 非阻塞型 （1.4以后） nio三件套 buffer（缓存区） selector（总控制器，控制底下work工作） channel（读取数据通道）
+aio 多线程非阻塞型（nio2 缺点主要依赖计算机性能）
+
+NioEventLoopGroup 相当于 1 个事件循环组，这个组里包含多个事件循环 NioEventLoop，每个 NioEventLoop 包含 1 个 Selector 和 1 个事件循环线程。
+
+netty分为客户端和服务端 都需要创建 NioEventLoopGroup
+netty各个组件创建使用 ServerBootstrap
+
+每个 NioEventLoopGroup 包含多个 NioEventLoop
+
+每个 NioEventLoop 中包含一个selector 和 一个taskQueue
+
+每个 Boss NioEventLoop 循环执行的任务包含 3 步：
+
+轮询 Accept 事件。
+处理 Accept I/O 事件，与 Client 建立连接，生成 NioSocketChannel，并将 NioSocketChannel 注册到某个 Worker NioEventLoop 的 Selector 上。
+处理任务队列中的任务，runAllTasks。任务队列中的任务包括用户调用 eventloop.execute 或 schedule 执行的任务，或者其他线程提交到该 eventloop 的任务。
+每个 Worker NioEventLoop 循环执行的任务包含 3 步：
+
+轮询 Read、Write 事件。
+处理 I/O 事件，即 Read、Write 事件，在 NioSocketChannel 可读、可写事件发生时进行处理。
+处理任务队列中的任务，runAllTasks。
+
+
+thread
+
+线程的4种初始化方式
+1.继承Thread
+2.实现Runnable接口    
+        Thread t1 = new Thread(syn)
+3.实现Callable接口 + FutureTask   
+		ExecutorService es = Executors.newFixedThreadPool(3);
+		Callable<Integer> task=new TestCallable();
+		Future<Integer> future=es.submit(task);
+4.线程池
+        Executors.newFixedThreadPool(15)
+        ExecutorService pool = new ThreadPoolExecutor(nThreads, nThreads,
+                                      0L, TimeUnit.MILLISECONDS,
+                                      new LinkedBlockingQueue<Runnable>())
+
+如果线程出现异常则会直接抛出到jvm层可以通过重写
+thread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                System.out.println("尝试捕获线程抛出的异常！");
+            }
+        });
+方法，让jvm捕获异常并且进行异常处理
+
+thread在什么时候会抛出interruptedException
+t.interupt() 调用时，线程处于（join/sleep/wait）几种状态下就会抛出interruptedException
+
+CompletableFuture线程异步回调的用法
+    创建异步操作，runAsync（不支持返回值） 和 supplyAsync方法（支持返回值）
+    计算结果完成时的回调方法：
+    whenComplete：执行完当前任务的线程，继续执行 whenComplete 的任务。
+    whenCompleteAsync： 执行完当前任务的线程，把whenCompleteAsync 的任务继续提交给线程池来执行。
+    exceptionally：当前任务出现异常时，执行exceptionally中的回调方法。
+    thenApply 方法，当一个线程依赖另一个线程时，可以使用 thenApply 方法来把这两个线程串行化。
+    handle 方法
+    handle 是执行任务完成时对结果的处理。
+    handle 方法和 thenApply 方法处理方式基本一样。不同的是 handle 是在任务完成后再执行，还可以处理异常的任务。thenApply 只可以执行正常的任务，任务出现异常则不执行 thenApply 方法。
+    thenAccept 消费处理结果，接收任务的处理结果，并消费处理，无返回结果。
+    thenRun 方法，跟 thenAccept 方法不一样的是，不关心任务的处理结果。只要上面的任务执行完成，就开始执行 thenAccept 。
+    thenCombine 合并任务，thenCombine 会把 两个 CompletionStage 的任务都执行完成后，把两个任务的结果一块交给 thenCombine 来处理。
+    thenCompose 方法，thenCompose 方法允许你对两个 CompletionStage 进行流水线操作，第一个操作完成时，将其结果作为参数传递给第二个操作。
+
+终止线程的3种方法
+1.使用标志位终止线程（让线程执行结束）
+2.使用 stop() 终止线程（立即终止，不推荐弃用）
+3.使用 interrupt() 中断线程（线程不会立即中断，何时中断由目标线程自行决定）
+
+向线程传递数据的三种方法
+1.通过构造方法传递数据
+2.通过变量和方法传递数据
+3.通过回调函数传递数据
+
+什么是线程安全
+就是保证 原子性，有序性，可见性
+
+线程池使用一个线程监控线程池
+ThreadPoolExecutor.getActiveCount(当前活动线程数)
+ThreadPoolExecutor.getCompletedTaskCount(完成线程数)
+ThreadPoolExecutor.getTaskCount(执行线程数)
+ThreadPoolExecutor.getQueue(当前排队队列数)
+
+Synchronized
+
+Synchronized(变量 名)、Synchronized(this) 等，说明加解锁对象为该对象。
+Synchronized 修饰的方法为非静态方法，表示此方法对应的对象为 锁对象;
+Synchronized 修饰的方法为静态方法，则表示此方法对应的类对象 为锁对象。
+
+当 一 个 对 象 被 锁 住 时 ， 对 象 里 面 所 有 用 Synchronized 修 饰 的
+方 法 都 将 产 生 堵 塞 ， 而 对 象 里 非 Synchronized 修 饰 的 方 法 可 正 常 被
+调 用 ， 不 受 锁 影 响 。
+
+Synchronized和ReentrantLock区别
+synchronized锁释放是自动的，当线程执行退出synchronized锁保护的同步代码块时，会自动释放synchronized锁。而ReentrantLock需要显示地释放：即在try-finally块中释放锁
+线程在竞争synchronized锁时是非公平的，而ReentrantLock能够实现锁的公平性
+synchronized锁是读写互斥并且 读读也互斥，ReentrantReadWriteLock 分为读锁和写锁，而读锁可以同时被多个线程持有，适合于读多写少场景的并发。
+
+join
+Thread.join() 使用了happens before模型保证线程的可见性
+原理就是将当前线程阻塞调用wait，等异步thread执行完会唤醒该线程（jvm虚拟机的线程exit会唤醒）
+
+threadLocal
+会在当前thread类中有一个 ThreadLocal.ThreadLocalMap threadLocals 的参数，会储存当前线程所需要保存的参数，它是由一个Entry数组组成
+数组的下标是根据 （firstKey.threadLocalHashCode & (INITIAL_CAPACITY - 1)）来计算的
+使用数组是因为区分同一个线程下的多个threadLocal
+
+ wait，sleep，join 和 yiled方法的不同
+ 
+最大的不同是在等待时 wait 会释放
+锁，而 sleep 一直持有锁。Wait 通常被用于线程间交互，sleep 通常被用于暂停执行。
+sleep 让线程睡眠指定时间，会释放cpu时间片
+join 就是 wait/notify 的操作
+yiled 让出时间片，触发重新调度 和 sleep(0)效果差不多
+
+volatile
+volatile 变量在并发环境中确保可见性和防止指令重排序
+通过调用汇编的lock指令来保证可见性
+原理 ： cpu 主内存和副内存之间同步策略，使用了volatile强制同步主内存保证数据读取同步，但是同样会使得cpu性能下降
+volatile 在数组中 只可以保证引用的可见性，并不能保证元素的可见性，如：object[0] =1,object[1]=new object 在0中不会做lock，在1中会做lock
+
+cpu缓存四种状态：modify修改（当L1修改的时候状态），exclusive独占（当只有一个L1缓存有数据时就是独占），shard共享（当L1和L2缓存都保存了同一个数据的时候就是共享），invalid失效
+内存屏障：
+    Load Barrier，在指令前插入Load Barrier，可以让高速缓存中的数据失效，强制从新从主内存加载数据
+    Store Barrier，在指令后插入Store Barrier，能让写入缓存中的最新数据更新写入主内存，让其他线程可见
+四种内存平展
+    LoadLoad屏障：对于这样的语句Load1; LoadLoad; Load2，在Load2及后续读取操作要读取的数据被访问前，保证Load1要读取的数据被读取完毕
+    StoreStore屏障：对于这样的语句Store1; StoreStore; Store2，在Store2及后续写入操作执行前，保证Store1的写入操作对其它处理器可见
+    LoadStore屏障：对于这样的语句Load1; LoadStore; Store2，在Store2及后续写入操作被刷出前，保证Load1要读取的数据被读取完毕
+    StoreLoad屏障（Fence Barrier全屏障）：对于这样的语句Store1; StoreLoad; Load2，在Load2及后续所有读取操作执行前，保证Store1的写入对所有处理器可见
+
+cpu层面保证可见性
+当L1和L2缓存都存在相同的数据（shard状态），如果L1缓存修改数据会首先把修改的值存入storeBuffer里，L1继续执行后面的操作，然后发送invalid给L2缓存让它失效，L2失效后返回ack给storeBuffer
+然后再同步到L1缓存，但是由于引入了storebuffer解决了阻塞的问题，但是会引起一个指令重排序问题
+
+volatile解决可见性问题（指令重排序）原理
+在每个volatile写操作后插入StoreLoad屏障，在每个volatile读操作后插入LoadStore屏障，屏障会禁止指令重排序并且会禁止读取cpu高速缓存，读写强制读去主内存里面的信息
+这样保证了volatile的可见性
+
+cas 自选 参数分别是对象unsafe，offset（偏移量，也可以理解为内存地址），原始值，期望修改值 方法：compareAndSetState(0, 1)
+
+JUC中常用类汇总
+
+JUC的atomic包下运用了CAS的AtomicBoolean、AtomicInteger、AtomicReference等原子变量类
+JUC的locks包下的AbstractQueuedSynchronizer（AQS）以及使用AQS的ReentantLock（显式锁）、ReentrantReadWriteLock
+附：运用了AQS的类还有：Semaphore、CountDownLatch、ReentantLock（显式锁）、ReentrantReadWriteLock
+JUC下的一些同步工具类：CountDownLatch（闭锁）、Semaphore（信号量）、CyclicBarrier（栅栏）、FutureTask
+JUC下的一些并发容器类：ConcurrentHashMap、CopyOnWriteArrayList
+JUC下的一些Executor框架的相关类： 线程池的工厂类->Executors 线程池的实现类->ThreadPoolExecutor/ForkJoinPool
+JUC下的一些阻塞队列实现类：ArrayBlockingQueue、LinkedBlockingQueue、PriorityBlockingQueue
+
+ReentrantLock
+Lock加锁的步奏
+首先去尝试获取cas锁，成功则线程继续运行，如果获取失败将当前线程封装成一个node添加到同步队列中，并调用
+LockSupport.park通过jvm调用操作系统使线程处于阻塞状态
+unlock解锁步奏
+首先释放cas锁，然后将同步队列的head线程调用LockSupport.unpark进行唤醒
+
+公平锁：按照线程在队列中的排队顺序，先到者先拿到锁
+非公平锁：当线程要获取锁时，先通过两次 CAS 操作去抢锁，如果没抢到，当前线程再加入到队列中等待唤醒。
+
+
+condition
+是一个cas用的wait用的AQS队列
+await()线程阻塞并释放锁方法，signal()唤醒阻塞状态线程方法
+await方法中也会调用LockSupport.park使线程处于阻塞状态
+
+BlockingQueue
+阻塞队列定义：队列满了添加队列线程会阻塞（await）队列执行完了take获取队列的线程会阻塞（await）
+put方法：
+首先判断队列是否满了，如果满了调用condition.await将线程放入阻塞队列中（notFull队列），如果没满put数据并且调用notEmpty.signal()，唤醒消费阻塞队列
+take方法：
+首现判断队列是否为空，如果为空将线程放入阻塞队列（notEmpty），如果不为空获取数据并且调用notFull.signal()，唤醒生产阻塞队列
+
+ArrayBlockingQueue ：一个由数组结构组成的有界阻塞队列。
+LinkedBlockingQueue ：一个由链表结构组成的有界阻塞队列。
+PriorityBlockingQueue ：一个支持优先级排序的无界阻塞队列。
+DelayQueue：一个使用优先级队列实现的无界阻塞队列。
+SynchronousQueue：一个不存储元素的阻塞队列。
+LinkedTransferQueue：一个由链表结构组成的无界阻塞队列。
+LinkedBlockingDeque：一个由链表结构组成的双向阻塞队列。
+
+countDownLatch
+countDown() 调用该方法自动将线程计数器减1当等于0是自动唤醒线程
+await() 设置countDownLatch的阻塞位置
+countDownLatch是一个共享锁的阻塞队列，通过设置state来实现一个共享锁，然后通过一个循环解锁将阻塞队列放入同步队列
+
+线程池
+1.newCachedThreadPool创建一个可缓存线程池程
+2.newFixedThreadPool 创建一个定长线程池
+3.newScheduledThreadPool 创建一个定长线程池
+4.newSingleThreadExecutor 创建一个单线程化的线程池
+线程池参数
+1.corePoolSize 线程池核心线程大小
+2.maximumPoolSize 线程池最大线程数量
+3.keepAliveTime 空闲线程存活时间
+4.unit 空间线程存活时间单位
+5.workQueue 工作队列
+6.threadFactory 线程工厂
+7.handler 拒绝策略
+
+等待线程池内所有线程执行完毕
+首先调用shutdown，然后通过  !executor.awaitTermination while循环判断是否完成shutdown
+
+线程池原理
+创建work线程，并且启动start，将work线程保存在一个hashset中
+将新任务添加到阻塞队列，work线程start的时会执行run方法，这个run方法是个while循环
+work线程run方法中会循环从阻塞队列中take数据
+当阻塞消费完的时候，利用阻塞队列的take特性将该线程阻塞，这样实现了线程的复用（无限while喜欢，加上take阻塞机制）
+
+线程池 线程回收原理
+去阻塞队列获取数据时，首先会判断当前运行线程是否大于corethread 如果大于获取队列会调用poll方法而不是take方法，根据最大超时时间，如果对应时间内
+poll取出为null责结束work线程的while循环，该线程结束运行
+
+线程池拒绝策略
+1.抛出异常
+2.执行run方法
+3.什么都不做
+4.调用队列的poll方法，继续执行execute对，队列进行消费
+
+线程池大小建议
+区分线程是 cpu密集型 还是 io密集型 
+cpu密集型，建议设置成和cpu大小一致
+io密集型，io密集势必会产生大量等待，可以将线程数设置的稍大一些
+
+concurrentHashMap
+使用cas进行加锁，创建一个node数组
+put数据的时候会对数组的第一个元素，也就是链表的第一个元素进行加锁sync锁，保证原子性
+在累加size的时候，会使用basecount，counterCells[]来储存size，当线程竞争非常激烈的时候会使用counterCells，并且counterCells会进行扩容（使用的cas操作）
+
+扩容
+concurrentHashMap支持多线程扩容，以16位作为一个标点
+扩容数组完成后会对数据进行迁移，低位的数据会在原始位置得到数据，高位的元素需要迁移
+
+Collections.sort底层排序方式
+
+小于60：使用插入排序，插入排序是稳定的
+大于60的数据量会根据数据类型选择排序方式：
+基本类型：使用快速排序。因为基本类型。1、2都是指向同一个常量池不需要考虑稳定性。
+Object类型：使用归并排序。因为归并排序具有稳定性。
+
+
+jvm
+java对象的创建过程
+1：检查类是否已经被加载
+2：为对象分配内存空间(tlab线程私有的内存空间，帮助分配内存，如果分配不下责直接在Eden中分配)
+3：为对象字段设置零值
+4：设置对象头
+5：执行构造方法
+
+Java 虚拟机栈会出现两种错误：StackOverFlowError 和 OutOfMemoryError
+StackOverFlowError： 若 Java 虚拟机栈的内存大小不允许动态扩展，那么当线程请求栈的深度超过当前 Java 虚拟机栈的最大深度的时候，就抛出 StackOverFlowError 错误。
+OutOfMemoryError： 若 Java 虚拟机堆中没有空闲内存，并且垃圾回收器也无法提供更多内存的话。就会抛出 OutOfMemoryError 错误。
+
+String.intern()
+JDK1.7之前（不包含1.7）的处理方式是在常量池中创建与此 String 内容相同的字符串，并返回常量池中创建的字符串的引用
+JDK1.7以及之后的处理方式是在常量池中记录此字符串的引用，并返回该引用。
+
+jvm性能调优监控工具
+jps – 用来查看JVM里面所有进程的具体状态, 包括进程ID，进程启动的路径等等。
+
+jinfo –可以知道崩溃的JVM参数配置信息及JDK版本安装路径等信息。
+
+jstat – JVM内建的指令对Java应用程序的资源和性能进行实时的命令行的监控，包括了对Heap size和垃圾回收状况的监控等等。
+
+jmap+jhat –jmap可以生成堆转储快照文件，jhat可以查看快照文件分析内存溢出可能的原因。可以通过设置启动参数自动dump outMamery的堆信息
+
+jstack -- 获取JVM当前线程，JVM内每个线程正在执行方法的栈信息，包括线程状态，什么线程操作导致当前线程状态。
+
+jdb – jdb 用来对core文件和正在运行的Java进程进行实时地调试，里面包含了丰富的命令帮助您进行调试，它的功能和Sun studio里面所带的dbx非常相似，但 jdb是专门用来针对Java应用程序的。
+
+jconsole – jconsole是基于Java Management Extensions (JMX)的实时图形化监测工具，这个工具利用了内建到JVM里面的JMX指令来提供实时的性能和资源的监控，包括了Java程序的内存使用，Heap size, 线程的状态，类的分配状态和空间使用等等。
+
+GC算法
+引用计数算法：
+	每个对象在创建的时候，就给这个对象绑定一个计数器。每当有一个引用指向该对象时，计数器加一；
+	每当有一个指向它的引用被删除时，计数器减一。这样，当没有引用指向该对象时，该对象死亡，计数器为0，这时就应该对这个对象进行垃圾回收操作。
+标记–清除算法：
+	为每个对象存储一个标记位，记录对象的状态（活着或是死亡）。
+	分为两个阶段，一个是标记阶段，这个阶段内，为每个对象更新标记位，检查对象是否死亡；
+	第二个阶段是清除阶段，该阶段对死亡的对象进行清除，执行 GC 操作。
+标记-整理算法：
+	标记-整理法是标记-清除法的一个改进版。同样，在标记阶段，该算法也将所有对象标记为存活和死亡两种状态；
+	不同的是，在第二个阶段，该算法并没有直接对死亡的对象进行清理，而是将所有存活的对象整理一下，放到另一处空间，然后把剩下的所有对象全部清除。这样就达到了标记-整理的目的。
+复制算法：
+	该算法将内存平均分成两部分，然后每次只使用其中的一部分，当这部分内存满的时候，将内存中所有存活的对象复制到另一个内存中，然后将之前的内存清空，只使用这部分内存，循环下去。
+	这个算法与标记-整理算法的区别在于，该算法不是在同一个区域复制，而是将所有存活的对象复制到另一个区域内。
+
+
+GC 收集器有哪些？
+
+年轻代（复制算法）
+	Serial收集器 串行收集器，适合单线程系统和小于100M内存
+	ParNew收集器 Serial的多线程版本，适合不在乎停顿时间
+	Parallel Scavenge收集器 收集器关注点是达到一个可控制的吞吐量（吞吐量 = 运行用户代码时间 / （运行用户代码时间 + 垃圾收集时间）） 并行
+老年代（标记清楚/整理算法）
+	Serial Old收集器 串行
+	Paraller Old收集器 并行
+	CMS（Conturrent Mark Sweep）收集器 并发收集器适合对gc停顿时间有要求
+	
+	G1收集器 并发收集器 G1默认触发GC比例是45%（45%开始触发初始标记），官方推荐内存大于6g适合使用g1
+	
+CMS 收集器与 G1 收集器的特点
+CMS :标记清除 空间碎片
+G1: 标记整理 减少空间碎片
+
+垃圾收集发生的时机是什么时候？
+Minor GC Eden区或者suvrvivor区不够用的时候
+Major GC 老年到不够使用了会触发gc,Major GC通常会伴随着Minor GC
+Full GC = Minor GC + Major GC + MetaSpace GC
+
+jvm优化
+GC次数：gc太平凡有可能是堆内存设置小了，堆太大会影响gc停顿时间
+内存占用：程序正常运行需要的内存大小。
+延迟：由于垃圾收集而引起的程序停顿时间。
+吞吐量：用户程序运行时间占用户程序和垃圾收集占用总时间的比值。
+设置堆内存大小，配置gc日志分析，根据gc停顿时间和吞吐量设置合理的g1停顿时间
+
+Survivor在年龄累计到15次以后还存活的对象会被移入到老年带
+Survivor中相同年龄的对象大小总合大于空间一半的时候，年龄等于或者大于的对象也会被移入老年代
+Minor GC 中仍然存活的对象不能在另一个Survivor完全容纳，也会通过担保机制直接进入老年代
+
+初始堆大小，默认物理内存的1/64
+最大堆大小，默认物理内存的1/4
+新生代内存大小，官方推荐为整个堆的3/8
+线程堆栈大小，jdk1.5及之后默认1M，之前默认256k
+设置新生代和年老代的比值。如:为3，表示年轻代与年老代比值为1：3，年轻代占整个年轻代年老代和的1/4
+年轻代中Eden区与两个Survivor区的比值。注意Survivor区有两个。如:8，表示Eden：Survivor=8:1:1，一个Survivor区占整个年轻代的1/8
+
+-Xms和-Xmx的值设置成相等，堆大小默认为-Xms指定的大小，默认空闲堆内存小于40%时，JVM会扩大堆到-Xmx指定的大小；空闲堆内存大于70%时，JVM会减小堆到-Xms指定的大小。如果在Full GC后满足不了内存需求会动态调整，这个阶段比较耗费资源
+
+内存泄漏和内存溢出的区别
+内存泄漏是内存一直的被占用不能够被gc，内存溢出是内存占用太大超出机器使用内存
+
+方法区中的回收主要是什么内容
+方法区中保存的主要是，类信息，静态变量，常量等
+堆里面不在有该对象了，方法区中信息会被回收
+加载该类的classLoader已经被回收了
+java.lang.class对象也不再有地方引用了，反射也不能使用（不是一定）
+
+可作为 GC Roots 的对象包括下面几种:
+虚拟机栈(栈帧中的本地变量表)中引用的对象
+本地方法栈(Native 方法)中引用的对象
+方法区中类静态属性引用的对象
+方法区中常量引用的对象
+
+不可达的对象会被垃圾回收，但是只有被最终标记后的不可达对象会被回收，在初次标记后可以使用finalize将被标记的对象再次变成不是垃圾的对象
+
+强引用（StrongReference）：oom也不会垃圾回收的
+软引用（SoftReference）：只有在内存不足的时候JVM才会回收该对象
+弱引用（WeakReference）：无论内存是否充足，都会回收被弱引用关联的对象
+虚引用（PhantomReference）：如果一个对象与虚引用关联，则跟没有引用与之关联一样，在任何时候都可能被垃圾回收器回收。
+	
+Redis
+
+redis基本数据类型，String  List Map  set  zset
+String redisObject -> StringObject（包含int，long等类型使用时会把数字转换成long或者int）
+            string在redis里是以char[] 数组的方式保存的
+List 双向链表
+map 数组+单向链表
+zset 跳表
+
+redis为什么性能好？
+纯内存 kv操作
+内部单线程实现，不需要创建销毁线程，没有并发资源竞争问题
+使用异步非阻塞队列 nio
+
+redis持久化策略？
+RDB 数据快照 根据设置 比如多久或者请求多少次后同步一次数据，将数据写入rdb文件
+AOF 保存操作命令 操作设置有 redis关闭保存命令，每天同步一次命令，每条命令都同步
+
+redis缓存过期策略
+定期扫描15%左右的数据，将过期的删除
+在读取时判断是否过期，过期的删除
+
+redis保证数据库一致的方式
+更新数据库前删除缓存，然后更新数据库，如果更新成功，为了防止其他地方并发，在数据库更新时又重新把旧数据写入缓存，可以sleep一段时候后再删一次缓存
+然后更新redis缓存，删，更库，删，添加
+
+单节点 Redis 锁setnx缺陷
+由于超时时间导致锁被多 Client 同时获取：
+    C1 获取锁 A 成功，但由于 GC 等原因线程挂起，锁 A 过期
+    C2 获取锁 A 成功
+    C1 & C2 同时认为自己加锁成功
+异步的主从复制 & Master 宕机，导致锁丢失：
+    C1 获取锁 A 成功，Master 宕机，Slave 未同步到锁 A
+    C2 获取锁 A 成功
+    C1 & C2 同时认为自己加锁成功
+
+
+redis集群
+
+sentinel
+sentinel leader选举使用的是raft算法，选出leader才能对redis进行选举
+master节点挂了如何选举：
+    首先看配置文件中的replica-priority 100 默认值是100，数值越小优先级越高
+    如果优先级相同看谁从master中复制的数据多，选择offset最大的那个，也就是复制数据最多的那个
+    如果复制数量也相同，就选择进程id最小的那个
+sentinel还提供了配置转发功能，sentinel集群后客户端不是直接连接redis了是直接连接sentinel节点，sentinel节点会转发master信息返回给客户端
+    
+cluster 首先生成一个长度为16383的插槽，然后对多个master进行槽位分配，数据写入根据CRC-16(key)%16383计算出
+key在那个master进行保存，集群下每个master都能接收客户端的访问，如果该master下没有数据会moved返回告知相应的数据
+在那个master下
+
+如果master死机了，可以根据slave选举，选出新的master
+
+Redisson锁种类
+可重入锁(Reentrant Lock)
+公平锁(Fair Lock)
+联锁(MultiLock)
+红锁(RedLock)
+读写锁(ReadWriteLock)
+信号量(Semaphore)
+可过期性信号量(PermitExpirableSemaphore)
+闭锁(CountDownLatch)
+
+RedLock基于Redisson实现的redis集群下的分布式锁，实现原理：
+假设有5个redis节点，这些节点之间既没有主从，也没有集群关系。客户端用相同的key和随机值在5个节点上请求锁，请求锁的超时时间应小于锁自动释放时间。
+当在3个（超过半数）redis上请求到锁的时候，才算是真正获取到了锁。如果没有获取到锁，则把部分已锁的redis释放掉。
+
+Redisson看门狗机制
+看门狗只有在没有设置过期时间的情况下才会默认启动，默认30秒过期
+为了防止业务还未执行完，redlock锁过期，启用了看门口机制，当获取锁以后后台会启动一个由netty时间轮实现的看门狗线程，执行时间间隔是
+默认过期时间/3，比如30秒过期每10秒会执行一次都锁进行重新设置过期时间30秒
+
+看门狗lua流程
+加锁：
+"if (redis.call('exists', KEYS[1]) == 0) then " +
+         "redis.call('hset', KEYS[1], ARGV[2], 1); " +
+         "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+         "return nil; " +
+         "end; " +
+        "if (redis.call('hexists', KEYS[1], ARGV[2]) == 1) then " +
+        "redis.call('hincrby', KEYS[1], ARGV[2], 1); " +
+        "redis.call('pexpire', KEYS[1], ARGV[1]); " +
+        "return nil; " +
+        "end; " +
+         "return redis.call('pttl', KEYS[1]);"
+查询key是否存在，如果存在（重入锁就对value+1）重新设置超时时间为30秒，如果不存责往hash表添加值并且加1，设置过期时间为30
+解锁：
+如果MY_LOCK的线程field存在，给value 减一，也就是重入锁退出一次。如果value还大于0，重新设置过期时间，返回0； 否则删除MY_LOCK
+往redisson_lock__channel:{MY_LOCK}通道发布一条消息0，返回1，在另一个线程抢锁的时候会监控PUBLISH订阅，如果是锁释放会继续去抢锁
+
+主从复制
+第一次复制时会生成一个rdb文件，后期新增会以aof方式同步从库
+复制积压缓冲区
+master生成RDB同步到slave，slave加载RDB这段时间里，master的所有写命令都会保存到一个复制缓冲队列里（如果主从直接网络抖动，进行部分复制也是走这个逻辑），待slave加载完RDB后，拿offset的值到这个队列里判断，如果在这个队列中，则把这个队列从offset到末尾全部同步过来，这个队列的默认值为1M。而如果发现offset不在这个队列，就会产生全量复制
+
+redis主从延迟和数据不一致处理方案
+min-slaves-to-write 1 //至少1台从库复制成功
+min-slaves-max-lag 10 //从库复制时间最大延迟10秒
+可以设置以上两个参数如果都不达标，那么强制禁止主库写入
+
+如果延迟过大可以部署cluster多主集群
+或者强制读取master信息
+
+jedis哨兵和cluster实现原理 和读写分离实现
+jedis输入哨兵连接地址，然后创建连接的时候会去哨兵获取到master地址，从而连接master，如果需要读写分离责需要自己写一个slaver连接，首先根据哨兵的master name获取到所有的
+slaver地址，然后在slaver地址上随机数获取一个slaver地址进行连接
+cluster连接时会把所有的master节点的 slot 分布返回给jedis，jedis会缓存到本地，set数据时会直接从缓存中获取slot对应的master去连接
+
+
+kafka
+
+为什么使用kafka？
+生产者消费者需求
+
+kafka如何保证消息有序
+方案一，kafka topic 只设置一个partition分区
+方案二，producer将消息发送到指定partition分区
+
+如何保存offset
+会默认创建一个topic，partition为50，根据grouid.hashCode%50 来计算当前groupid对用的offset存放在那个partition下面
+
+ack
+ack是一个数据同步级别配置
+0表示发送数据不需要返回值，数据风险比较大
+1表示只要同步了leader副本就会返回发送成功
+-1表示需要isr中所有的副本同步成功才返回成功（安全性最高，性能最差）
+
+Isr
+isr会标记kafka所有副本 ，isr副本健康检查是通过 当前时间 - 最后同步时间 > 设置的最大时间差 来判断某个副本服务器是否存活
+isr 同步数据是通过，hw行数，和leo 来判断的
+isr 偏移量参数修改失败的时候，会触发rebalance 重新分配同一个cosumergroup 下其他可用消费者重试
+
+topic订阅主题，groupid消费组群
+broker 是指消息代理producers往broker中的topic去推送消息，consumers往broker的topic中去拉去消息
+
+kafka数据是保存在磁盘上的，通过segment对数据进行分割分片大小可配置，每个分片包含文件：
+0000000.index   数据索引，比如当前indexOffset：199（索引位置），logOffset：178（内容位置）
+0000000.log     消息数据内容，比如offset，createtime，payload（内容），key等等
+0000000.timeindex 
+0000000.snapshot
+
+日志清理策略
+过期清理 ，分两种 文件大小和时间周期 默认保留时间为7天
+压缩，同类型数据会进行数据合并
+
+kafka实现高吞吐的原因是，使用 页缓存，磁盘顺序写，零拷贝技术
+        1. 顺序写磁盘
+        2. 分段日志 + 索引文件
+        3. 零拷贝
+        4. Page Cache
+        5. 批量发送
+        6. 数据压缩
+        
+producer 的写入流程
+producer 先从 zookeeper 的节点找到该 partition 的 leader 
+producer 将消息发送给该 leader
+leader 将消息写入本地 log 
+followers 从 leader pull 消息，写入本地 log 后 leader 发送 ACK 
+eader 收到所有 ISR 中的 replica 的 ACK 后，并向 producer 发送 ACK（默认情况下，直同步一个副本节点就认为成功，可以设置参数修改）
+
+consumer组群
+kafka 的分配单位是 patition。每个 consumer 都属于一个 group，一个 partition 只能被同一个 group 内的一个 consumer 所消费
+（也就保障了一个消息只能被 group 内的一个 consuemr 所消费）
+但是多个 group 可以同时消费这个 partition。
+多线程消费，也就是指多个consumer消费partition，一个group多个线程消费必须具备多个对应的partition，就是说3个消费者就至少要有3个partition，一个消费者
+只能消费一个partition
+
+
+RabbitMQ
+mq解决了，异步 解藕 削峰的问题
+
+rabbitMq是又一个交换机和队列组成，消息首先发往交换机，再由交换机根据策略，发送到相应的队列
+
+rabbitMq可以使用rabbitmq-delayed-message-exchange插件来实现消息延迟消费，添加插件后会有一个delayed-message-exchange路由，当时间延迟到了以后
+会将相应的消息发送到队列中
+
+rabbitmq路由类型
+Direct Exchange：
+所有发送到Direct Exchange的消息被转发到RouteKey中指定的Queue
+注意：Direct模式可以使用RabbitMQ自带的Exchange:default Exchange，所以不需要将Exchange进行任何的绑定（binding）操作，消息传递时，RouteKey必须完全匹配才会被队列接收，否则该消息会被抛弃
+
+Fanout Exchange：
+不处理路由键，只需要简单的将队列绑定到交换机上
+发送到交换机的消息都会被转发到与该交换机绑定的所有队列上
+Fanout交换机转发消息是最快的
+
+Topic Exchange：
+
+所有发送到Topic Exchange的消息被转发到所有关心RouteKey中指定Topic的Queue上
+Exchange将RouteKey和某Topic进行模糊匹配，此时队列需要绑定一个Topic
+注意：可以使用通配符进行模糊匹配
+符号“#”匹配一个或多个词
+符号“*”匹配不多不少一个词（只能匹配一个词）
+例如“log.#”能匹配到“log.info.oa”
+"log.*"只会匹配到"log.error"
+
+mq进入死信队列的情况
+1.当队列中的消息过期了还未必消费
+2.当队列长度超出设置长度，最早的消息会依次被放入死信队列
+3.当队列大小超过设置大小，比如1024m，最早的消息会依次被放入死信队列
+
+mq如何保证有序队列
+
+rabbitMq集群
+集群部署一般用一个磁盘节点 加上两个内存节点来搭建
+普通集群
+    各个节点之间的数据不会相互备份，ABC三个节点，当用户访问A节点，获取B节点上的数据，会把请求转发到B节点上获取数据
+镜像队列
+    各个节点之间，不仅复制元数据，连路由和消息也会相互复制
+集群状态下负载需要安装haproxy
+
+
+rocketMQ
+rocketmq是由一个nameserver（类似于注册中心，kafka是zookeeper）和broker组成，broker每隔30秒会发送tcp长链接心跳给nameserver
+nameserver每隔10秒会检查broker续约的心跳，如果发现120秒还没有续约的节点会被移除
+生产者每隔30秒也会主动从nameserver中拉取一次brocket节点信息
+
+rocketMQ消费者消费分为两种模式，一种是集群模式（一个消费者消费1，3另一个消费者消费2，4），一种是广播模式（每个消费者都消费1234）
+rocket和kafka一样支持分片，分片使用messageQueue同一个topic下的数据可以根据messageQueue分布在各个Broker下面
+
+messageQueue分发机制
+轮询
+当默认两个写队列（messageQueue）的时候，会在每个broker上面都会创建两个队列，发送消息时默认规则是
+对broket和队列进行轮询，比如：broker1，queue1    broker1，queue2    broker2，queue1    broker2，queue2
+hash
+根据hash取模，来实现分发到那个broket的某一个队列中
+随机
+随机选择一个broket的某一个队列
+machineRoom
+自定义实现分配到某一个messageQueue中
+
+顺序消费实现原理
+生产者使用单线程发送，在写入broker的时候使用固定的hashkey保证消息发送到同一个messageQueue，消费者消费的时候只能有一个线程
+
+事务消息
+实现一个RocketMQMessageListener监听，当消息返回未知的时候MQ会去回查checkMessage方法（需要自己实现）首次6秒没有得到返回会会差，后面每一分钟回查一次
+如果还没得到返回，该条消息会被丢弃
+
+文件存储
+rocketMQ所有消息数据都是存储到commitLog文件下面的，单个文件最大是1g，当超出大小的时候会根据你的offset生成一个根据offset命名的新文件（官方说法同一个文件存储是因为是方便linxu io
+linxu在大段落文件写入磁盘的效率更高）
+消息和队列的关系是记录在consumequeue文件夹里面的，根据这个文件夹去找commitLog里面对应的数据
+index文件夹里面存的是索引，rocketMQ是支持页面查询的，当发送消息的时候会有一个keys参数就是这个索引，index是一个hash索引，所以keys最好是一个唯一索引，不然在hash查询的时候会有问题
+
+延迟消息
+    首先将消息发送到某个临时存储，然后由一个delay service检查消息是否到期，如果到期了发送到指定的topic 中进行消费
+    
+    修改消息Topic名称和队列信息
+    转发消息到延迟主题的CosumeQueue中
+    延迟服务消费SCHEDULE_TOPIC_XXXX消息
+    将信息重新存储到CommitLog中
+    将消息投递到目标Topic中
+    消费者消费目标topic中的数据
+    
+消费负载策略
+（默认）AllocateMessageQueueAveragely平均分配。例如队列MQ1、2、3、4、5、6、7、8， 消费者C1、2、3，则C1消费MQ1、2、3，C2消费MQ4、5、6，C3消费MQ7、8
+AllocateMessageQueueAveragelyByCircle轮询分配。例如队列MQ1、2、3、4、5、6、7、8， 消费者C1、2、3，则C1消费MQ1、4、7，C2消费MQ2、5、8，C3消费MQ3、6
+AllocateMachineRoomNearby根据broker机房临近
+AllocateMessageQueueByConfig根据配置消费
+AllocateMessageQueueByMachineRoom制定一个broker的topic中的queue消费
+AllocateMessageQueueConsistentHash一致性哈希
+
+消费重试机制
+    如果消费一直没有返回或者超时会发起重试，将消息放入延迟队列中，和上面延迟消费逻辑一样，重新放入队列中进行消费，如果重试次数超过16次，可以设置放入死信队列
+    中，死信队列中的需要人工干预去消费死信队列
+    
+brokerRole
+    ASYNC_MASTER 主从异步复制
+    SYNC_MASTER 主从同步双写（推荐）
+flushDiskType 刷盘类型
+    ASYNC_FLUSH 异步刷盘（默认）
+    SYNC_FLUSH 同步刷盘
+
+主从数据同步
+slave每隔5秒主动向master发送offset偏移量数据，master收到slave发送的偏移差查找出相应的数据返回给slave，slave更新commitlog
+
+注意：当rocketMq的写队列数量大于读队列数量，比如写队列为2个，读队列为1个，会出现读队列只读每个broker中的0这个队列，1这个队列会没人去消费
+
+rocketMQ 包含topic，tag（过滤消息建，发送消息时可以指定tag，读取消息时指定读取tag），keys（用于检索消息的索引字段）
+
+rocketMQ高性能的原因
+    使用commitlog大文件顺序写，大大提升了磁盘写入的效率
+    page cache页缓存，又称操作系统缓存，内核空间
+    mmap（memory map）也是零拷贝的一种，是指在用户空间区和内核空间之间建立一种映射，使得用户可以直接操作内核空间中的数据，不用将内核空间数据复制到用户空间，大大提升了效率
+    
+文件清除
+    清除文件主要包括commitLog和consumequeue文件夹下的文件
+    默认情况下是72小时的文件被标记为过期文件
+    默认情况下是每天凌晨4点会执行一次过期文件删除，或者你的文件磁盘使用率超过了磁盘的85%
+    如果磁盘使用率超过90%，会直接拒绝消息的写入 
+
+springBoot
+
+spring如何注入static方法
+    @Autowired
+    private MyMethorClassService    myService;
+    @PostConstruct //使用postConstruct配合init注入
+    public void init(){
+        staticInstance.myService = myService;
+    }
+
+类加载机制是什么？
+根据@EnableAutoConfiguration注解，去找到所有的META-INF/spring.factories 配置文件并且根据配置文件加载相应的类
+调用 importSelector 获取和扫描META-INF/spring.factories
+通过springFactoriesLoader方法去加载
+
+@ConditionalOnClass(DockerController.class) 这个注解表示当这个类没有的时候当前Configuration不用被spring管理
+@Configuration 和 @Bean直接的方法是可以通过spring @AutoWired来注入的
+@Configuration 和 @Component 区别是被@Configuration注解的类会生成代理，@Component生成的就是原生的类
+
+
+springCloud
+
+ribben
+ribben默认每30秒会更新一次服务列表
+
+ribbion的负载均衡算法结构：
+（1）RoundRobinRule：轮询；
+
+（2）RandomRule：随机；
+
+（3）AvailabilityFilteringRule：会先过滤掉由于多次访问故障而处于断路器状态的服务，还有并发的连接数量超过阈值的服务，然后对剩余的服务列表按照轮询策略进行访问；
+
+（4）WeightedResponseTimeRule：根据平均响应时间计算所有服务的权重，响应时间越快的服务权重越大被选中的概率越大。刚启动时如果统计信息不足，则使用RoundRobinRule（轮询）策略，等统计信息足够，会切换到WeightedResponseTimeRule；
+
+（5）RetryRule：先按照RoundRobinRule（轮询）策略获取服务，如果获取服务失败则在指定时间内进行重试，获取可用的服务；
+
+（6）BestAvailableRule：会先过滤掉由于多次访问故障而处于断路器跳闸状态的服务，然后选择一个并发量最小的服务；
+
+（7）ZoneAvoidanceRule：复合判断Server所在区域的性能和Server的可用性选择服务器；
+
+eureka
+
+集群同步
+每次注册或者修改服务信息后eureka都会判断是否是集群模式，集群模式下eureka会相互注册，然后根据注册服务信息for循环同步注册信息
+或者每15分钟会启动一次定时任务相互之间同步数据
+
+自我保护机制
+心跳失败的比例在15分钟内，低于85%的节点，触发自我保护机制
+Eureka Server不再从注册列表中移除因为长时间没收到心跳而应该过期的服务
+Eureka Server仍然能够接受新服务的注册和查询请求，但是不会被同步到其它节点上，保证当前节点依然可用
+当网络稳定时，当前Eureka Server新的注册信息会被同步到其它节点中
+
+默认每30秒服务会触发心跳机制，告诉eureka它还活着
+
+eureka三级缓存
+eureka服务地址是保存在缓存内的，一共分为三级缓存，是一个典型的读写分离做法
+主缓存接受服务注册的 -> 每过60秒会同步到写缓存 -> 写缓存每过30秒会同步到到读缓存
+修改首先在一级缓存注册表中修改，并使二级缓存失效
+读取先从3级读缓存中读取，如果没有就会去二级缓存中读取，如果二级缓存是失效状态就会去同步注册表主缓存
+每过30秒会从二级缓存同步数据去三级缓存，如果二级缓存是失效状态会去同步主缓存
+
+eureka服务下线
+每60秒会执一个任务对90s为续约的服务进行下线
+
+hystrix
+
+降级机制
+
+熔断降级
+	可以设置多少个请求，并且请求成功率低于%多少就会触发降级
+请求超时降级
+	超时降级访问请求超时，触发熔断，可配置多少秒超时和多少秒触发重试，重试后连通恢复正常
+线程池隔离
+	可以指定某个容器线程数和并发量，超过就会触发降级
+
+
+
+tomcat
+对外组件 service connector
+对内组件 	container -> engine -> host -> context -> web app
+
+优化
+可以优化 connector 设置他的io bio，nio，nio2 设置它的线程大小，默认是200个线程
+将不需要的监听等功能从配置文件中删除，将host中定期自动加载配置文件等功能关闭
+可以把静态资源（css，js等）放在cdn，nginx避免去访问tomcat
+分布式架构的情况下，session可以使用redis来存储，tomcat中关于session的配置也可以去掉
+可以是否压缩 设置compression=100   就表示当传输文件达到100byte，就会对数据进行压缩
+
+tomcat的三种部署方式
+1.context方式部署
+打开tomcat下conf/server.xml，在<Host> </Host>标签之间输入项目配置信息
+<Context path="" docBase="/usr/local/testbushu" reloadable="true" />
+
+2.war包部署，将war包放在webapps下面
+
+3.进入到 apache-tomcat-7.0.52\conf\Catalina\localhost 目录，新建一个 项目名.xml 文件
+名字是：sanmenthod.xml 内容是：<Context  docBase="/usr/local/testbushu" reloadable="true" />
+访问路径是：localhost:8080/sanmenthod/hello
+
+
+ConcurrentHashMap
+
+>=6 的时候会从红黑树变成链表
+在put的时候会对循环的node对象进行synchronized加锁
+
+在扩容的时候会设置sizectl=-1，表示正在扩容其他扩容请求进来后会调用U.compareAndSwapInt(this, SIZECTL, sc, -1)
+如果在扩容中会等待。
+扩容是复制算法，新建一个数组并且将原来的数组复制到新的数组中，如果这时候get请求会访问老的数组如果有值就会正常访问
+在扩容时迁移链表，会把整个链表锁住
+
+
+Object
+object里面有哪些方法
+getClass,hashCode,equals,clone,toString,notify,notifyAll,wait,finalize
+
+
+设计模式
+
+工厂模式
+常用的比如，calendar.getInstance(),beanFactory,logFactory 都属于工厂模式
+abstractBeanFactory这种属于抽象工厂模式
+
+单例模式
+普通的单例模式都可以被反射破坏
+通过clazz.getDeclaredConstructor获取构造方法，再设置setAccessible(true)强制访问
+不过可以在构造方法中，判断是否已经创建来解决这个问题
+
+enum的单例模式是不能用反射来创建的，因为jdk底层就会判断，反射如果是enum就报错
+
+原型模式
+BeanCopy就是一个典型的原型模式，将一个反复set参数的动作，通过反射循环将值放入另一个对象
+原型模式分“浅拷贝” 和 “深拷贝” 浅拷贝是复制的对象地址，深拷贝是复制对象真正的值
+一半对象implements Cloneable接口，就可以调用Object中的clone方法法了，默认是浅克隆，object的clone是native说明这个方法是调用底层的C来实现的
+
+如何实现深克隆
+1.可以使用字节流，new一个byteArrayOutPutStream 将对象作为一个objectStream来写入内存
+  然后通过byteArrayInputStream将对象作为一个ObjectInputSteam.readObject来读取出来
+2.可以将对象转换成一个json字符串，然后再将json字符串转换成一个对象，这样也可以实现一个深克隆
+
+
+建造者模式
+适用于创建对象需要很多步骤，但是步骤顺序不一定固定，把复杂的对象创建和使用分离
+比较典型的就是sql拼接，将需要拼接的对象塞入一个对象，无论顺序如何最后生成一个你需要使用的sql如jpa框架
+建造者模式时常配合链式编程一起使用
+StringBuilder也是个典型的建造者模式 一般源码里带build都是建造这模式比如BeanDefinitionBuilder
+
+
+代理模式
+jdk代理是通过接口实现，cglib代理是通过继承目标类创建子类来实现
+
+门面模式
+将多个调用封装成一个方法来调用，重点是在于封装，比如常用的service就是一个典型的门面模式,contraller也是门面模式
+jdbcUtils也是门面模式，一般Utils也是门面模式
+
+装饰器模式
+定一个abstract借口，定一个装饰器类，在定义一个base类，这样如果有扩展的时候可以继承装饰器类，在原有的base方法上做增强扩展
+一般构造方法会传入一个对象的，比如BufferedInputStream
+
+享元模式
+一个对象如果会反复使用那么可以把它放在一个容器中保存，这样就可以防止一个对象反复创建，就是享元模式（共享元素）
+Java的常量池其实也是个享元模式，String str = "abc" abc在常量池中会被共享不会反复创建
+一般享元模式和工厂模式配合一起使用，一般底层代码看到cache基本也都是享元模式
+
+组合模式
+又一个顶层的抽象，负责装载各个节点的数据，比如 文件目录->文件夹->文件，可以用抽象建立一个目录，将文件夹和文件分别放入
+ArrayList中的addAll也是组合模式，Hashmap的putAll也是一个典型的组合模式
+
+适配器模式
+当一个类已经不能满足当前需求了，就需要一个适配器来扩展旧的方法，可以写一个新的类实现以前的借口，并且把以前的实现类作为参数常量放入当前类，当调用这个方法的时候
+对他进行功能扩展
+
+桥接模式
+一个interface，需要扩展多个功能可以用一个抽象类将两者关联起来
+
+委派模式                结构型模式
+委派模式和代理模式很相似，当一个类调用另一个类去执行相应的功能，就是委派模式
+委派模式一般配合策略模式一起使用
+servlet一般就是一个委派模式+策略模式一起使用，将servlet封装成一个map，key为if条件value为new object
+一般clssload的双亲委派机制就是一个委派模式，mothod的.invoke也是一个委派模式是通过委派给methodAccessor来执行的inoke
+
+模版模式
+设置一个抽象类将运行流程定义好，子类调用的时候可以直接按照这个顺来调用，这就是模版发放，按照父类排好的模版来运行子类
+
+策略模式
+策略模式+委派模式+工厂模式是一个典型的组合，servlet就是一个典型的策略模式
+支付场景也是一个典型的策略模式使用场景，把if else组装成一个map对象key作为选择条件根据key来new出对应的委派类来执行相应的功能，可以用工厂模式
+来创建相关的策略
+
+责任链模式                   行为型模式
+责任链模式就类似一个链表，类中定义一个next对象，如果当前对象处理不了就调用next对象来处理
+初始化的时候可以配合建造者模式，来初始化用个链表，常用的场景如登陆验证账号，验证权限等功能
+一个list按顺序处理也是一个责任链模式
+Java的filt就是一个责任链模式，netty中DefaultChannelPipeline 也是一个典型的责任链模式
+
+迭代器模式                   行为型模式
+平时开发中很少使用到，集合的iteraotr就是一个迭代器模式
+
+命令模式
+junit 里面会用到一个命令模式，shell其实也是个命令模式
+
+状态模式
+就是调用比如订单下单方法，然后自动把状态变成已下单
+
+
+mongodb
+用户请求 - > mongos(路由，统一管理的配置中心) - >  获取mongo config(配置的服务地址)  - > mongodb （具体的副本集地址） - > mongos返回给用户
+
+组成
+Field字段 -> Document文档 -> Collection集合 -> DataBase数据库 
+
+集群方式
+1.路由 -> 分片配置中心 ->具体的集群分片
+2.master -> slave ->仲裁节点（只做调度）
+
+分片策略
+按区间分片，按hash分片（crc32算法），组合分片，标签分片
+查询时去config集群去寻找具体在那个分片，然后根据分片对应的数据分片集群中去查询到这条数据
+
+mongodb的索引结构是B+tree
+
+dubbo
+默认负载均衡，是随机数负载
+默认负载类，随机数，轮询，hash（一致性hash），最小活跃度
+客户端和服务端都可以配置负载均衡
+方法层面的配置要优先于接口层面的配置，接口层面的配置要优先于全局配置
+如果级别一样，以客户端配置优先，服务端次之
+
+dubbo服务集群容错
+failover cluster：失败默认重试其他服务器（默认） 重试次数为2，加上本身调用一共是3次
+failfast cluster：快速失败，立马报错
+failsafe cluster：出现异常，直接吞掉，不报任何错误
+failback cluster：失败自动恢复，记录失败请求，定时重发
+forking cluster：并行调用多个节点，只要其中一个成功返回，那么就直接返回结果
+broadcats cluster：广播调用，一个请求调用所有的服务提供者，只要一台报错，那就就认为请求失败
+
+dubbo服务降级
+超时降级
+
+dubbo性能调优
+threadpool 业务线程池，默认大小为200
+executes 服务提供着的最大请求数
+
+dubbo的缓存文件
+可以将注册中心的信息，缓存到本地文件，即使注册中心挂了也能正常调用
+
+nacos
+cp（临时节点）ap（持久化节点）
+nacos如果要搭建集群的话必须由要3台服务器，原因是少数服从多数
+客户端心跳机制是每隔10秒去拉取一次注册中心服务列表，缓存到本地
+
+nacos每隔5秒会对服务端做一次健康检查，在心跳检查失败的服务，会给客户端push一个消息基于udp的请求
+
+nacos集群选举采用的raft算法
+raft算法：当3台机器启动后都是follwer状态，然后相互通讯发现没有leader，就会变成candidate状态，
+每台节点会生成一个随机时间在150～300ms 当时间走完的节点会发起投票，向其他两个节点发送
+leader选举请求，得到的选票多的那个节点会被选举为leader，当一个写操作请求落在任意一个节点上都会转发到leader节点上进行写操作
+
+nacos监控
+grafana+prometheus监控nacos
+
+nacos config
+nacosConfig同步数据是使用长轮询来实现的，当客户端定时请求服务端时如果发现配置没有更改这个请求会hold住，知道更改了会返回客户端
+这个长轮询超时时间为30秒，长轮询是使用asyncContext来实现的
+
+cacos config判断某一个配置文件是否发生变化的方式是通过md5来验证的，一个配置文件生成一个md5编码
+
+zookeeper 分布式协调
+zookeeper是协调微结构下节点的分布式一致性问题
+zookeeper 分为leader，follower，observer节点，由于follower节点需要参与数据同步，又要参与投票在集群多的模式下引入了observer节点，该节点只需要同步数据不用参与投票
+
+zookeeper常用语解决，注册中心，分布式锁，leader选举等，分布式一致性问题
+Java操作zookeeper的工具 curator等
+
+zookeeper分布式锁的实现原理
+zookeeper利用有序节点+watcher功能实现的分布锁，首先为每个获取锁的进程生成一个节点，如果是最小的节点会直接获取锁，其余的节点会监听（watcher）上一个节点
+如果它被删除了，就说明锁被释放了
+
+zookeeper leader选举逻辑
+分别比较 epoch（纪元，记录leader的周期） -> zxid（事物版本号，那个版本最新说明那个数据是最新的） -> myid （节点序号） 以上3个数据最新的投票选举为leader 
+
+sentinel
+该组件主要负责，服务的限流和熔断，一般限流使用滑动窗口，也支持令牌桶
+
+sentinel 限流策略
+直接拒绝，warm up（慢慢预热机器使其达到性能巅峰），匀速排队（每隔一段时间允许一个请求，类似漏桶算法）
+
+分布式事务
+事务是为了解决数据的幂等性
+XA协议，全局一致性
+弱一致性，补偿型
+
+分布式事务模式
+AT ：
+        无侵入的分布式事务解决方案，适用于不希望对业务进行改造的场景，几乎0学习成本（sql都由框架托管统一执行，会存在脏写问题）
+TCC：
+        2pc 又叫TCC事务 把事务的处理逻辑放在了业务上
+        try：对于资源的准备
+        confirm（commit）：数据的提交
+        cancel：数据的回滚
+        高性能分布式事务解决方案，适用于核心系统等对性能有很高要求的场景（第一阶段会产生行锁，事务执行太久会锁行很久）
+SAGA：
+        长事务解决方案，适用于业务流程长且需要保证事务最终一致性的业务系统（第一阶段就操作DB，会存在脏读问题）
+XA：
+        分布式强一致性的解决方案，但性能低而使用较少。
+
+2pc 又叫TCC事务 把事务的处理逻辑放在了业务上
+        try：对于资源的准备
+        confirm（commit）：数据的提交
+        cancel：数据的回滚
+        
+seata
+seata存储模式，db，file，redis
+
+ElasticSeach
+es特点，可拓展性（大到上百台，小到一台），技术整合度高，部署简单，接口简单，功能强大（全文检索，SQL的功能几乎都有）
+es 主要结构，node节点，index索引，document文档（数据行），field字段，type类型（7.0以后废除）
+
+es是使用fst 来作为压缩索引，放入内存提高搜索效率
+
+es分片路由策略是根据 hash(doc_id)% 分片数量 取模 来找到具体数据放入那个分片中的
+
+Elasticsearch给IK分词器添加自定义词汇
+touch myDict.dic 创建dic文件将词语添加入文件，在IKAnalyzer.cfg.xml里倒入该份文件
+
+任务调度
+crontab ，jdk timer，ScheduledThreadPool，Quartz，spring task，xxl-job，e-job
+
+Quartz
+由JobDetail（任务信息）和Trigger（触发器，设置定时）组成，jobListener，scheduledListenner和triggerListenner是可以自定义实现监听类
+Quartz集群状态下，防止任务重复执行的方式是，查询数据库lock表然后用 select ...from ... for update来将数据行锁住，在任务执行完了后都会rollback数据库释放锁
+
+xxl-job
+是通过 定时去时间轮中获取数据，然后通过work线程，http调用客户端的socket接口，将任务放入一个tiggerQueue，通过反射调用，然后返回定时任务结果
+
+mysql
+mysql主要架构：连接器，查询缓存，分析器，优化器，执行器
+
+隔离级别
+1.读未提交（read-uncommitted）
+    可以脏读
+2.读提交（read-committed）
+    只读提交过的数据
+3.可重复读（repeatable-read）
+    mvcc机制，读取<=当前事务版本的数据，如果事务版本号大于当前事务，则去读取的undolog数据（mysql默认隔离级别）
+4.串行化（serializable）
+    添加表锁，串行读
+
+Spring事务传播属性
+REQUIRED（默认属性）如果存在一个事务，则支持当前事务。如果没有事务则开启一个新的事务。
+MANDATORY 支持当前事务，如果当前没有事务，就抛出异常
+NEVER 以非事务方式执行，如果当前存在事务，则抛出异常
+NOT_SUPPORTED 以非事务方式执行操作，如果当前存在事务，就把当前事务挂起
+REQUIRES_NEW 新建事务，如果当前存在事务，把当前事务挂起
+SUPPORTS 支持当前事务，如果当前没有事务，就以非事务方式执行
+NESTED 支持当前事务，新增Savepoint点，与当前事务同步提交或回滚
+
+spring事务默认只会对runTimeException和error进行回滚，check型exception是不会进行回滚的
+
+sql执行顺序
+1.from 2.where 3.groupby 4.having 5.聚合函数（max(),min()..）5.select 6.orderby
+
+关键字和命令
+使用!=不会走索引
+select concat('字符1','字符2','字符3')  concat字符拼接，group_concat拼接group后的字符
+explain select ...  explain关键字可以帮助查看索引命中率
+
+查看当前数据库：select database();
+查看所有数据库：show databases;
+查看当前用户：select user();
+查看当前MySQL的版本：select version();
+查询结果重复项合并：select DISTINCT(cid) FROM sc z,course c WHERE z.cid =c.id
+
+索引建立注意事项
+1.索引不会包含有NULL值的列
+2.使用短索引
+3.索引列排序
+4.like语句操作
+5.不要在列上进行运算
+6.不使用NOT IN和<>操作
+
+mysql查询和更新语句执行流程
+select：首先查询是否有权限，然后以sql为key查询缓存是否有，如果没有然后进入分词器进行分析比如：先查张三再删选18岁的还是先查询18岁在筛选张三
+            然后开始执行sql
+update：首先查询到这条数据，如果有缓存也会用到缓存，然后对数据修改并且保存在内存中，同时记录redolog（修改后的数据）和undolog（修改前的数据）然后执行更新
+                并且记录binlog，此时如果数据库崩溃或者宕机，那么当系统重启进行恢复时，就可以根据redo log中记录的日志，把数据库恢复到崩溃前的一个状态。未完成的事务
+                可以继续提交，也可以选择回滚，这基于恢复的策略而定
+
+binlog的三种模式
+Statement Level模式（默认）
+    每一条修改数据的sql都会记录到master的bin_log中
+Row Level模式
+    日志中会记录成每一行数据修改的形式
+Mixed模式
+     实际上就是前两种模式的结合，在mixed模式下，mysql会根据执行的每一条具体的sql语句来区分对待记录的日志形式，也是在statement和row之间选择一种
+     
+binlog删除方式
+1.通过设置expire-logs-days控制想保留的binlog日志文件天数，系统将会自动清理。
+1.通过PURGE BINARY LOGS手动清理
+
+mysql 主从同步流程
+show slave status\G  查看mysql主从相关信息，数据延迟等
+主库上面有一个IO线程，从库上有一个IO线程和一个SQL线程，主库中的dump线程负责从binlog读区日志发送到从库中的IO线程并把binlog文件转存到中继日志的relay-log文件
+从库io并把binlog文件名和pos点记录到master.info文件中，从库的SQl线程监测出relay-log文件后，把relay-log文件转换为binlog文件在本地执行，并把relay-log文件名和pos点记录到relay-log.info文件中
+
+mysql主从延迟问题以及优化方案
+发现主从同步延迟的三种方式
+1.show slave status显示参数Seconds_Behind_Master不为0，这个数值可能会很大
+2.show slave status显示参数Relay_Master_Log_File和Master_Log_File显示bin-log的编号相差很大，说明从库没有及时同步数据
+3.mysql的从库数据目录下存在大量mysql-relay-log日志，该日志同步完成之后就会被系统自动删除，存在大量日志，说明主从同步延迟很厉害
+
+引起主从延迟的原因
+mysql的主从复制都是单线程的操作，主库对所有DDL和DML产生binlog，binlog是顺序写，所以效率很高，slave的Slave_IO_Running线程到主库取日志，效率比较高，下一步，问题来了，slave的Slave_SQL_Running线程将主库的DDL和DML操作在slave实施。DML和DDL的IO操作是随即的，不是顺序的，成本高很多，还可能可slave上的其他查询产生lock争用，由于Slave_SQL_Running也是单线程的，所以一个DDL卡主了，需要执行10分钟，那么所有之后的DDL会等待这个DDL执行完才会继续执行，这就导致了延时。
+
+解决主从延迟的方法
+1.从架构层面，使用redis等缓存降低mysql的读压力
+2.使用分库架构，对mysql平行扩展，分散压力
+3.修改redolog（innodb_flush_log_at_trx_commit）和binlog（sync_binlog）的同步磁盘方式，默认情况下是每次提交都会同步写入日志，可以修改成先写入os cache 系统缓存然后由系统决定何时刷新磁盘
+    或者直接禁止使用从库的binlog
+
+linxu
+常用命令
+netstat 查看tcp连接数
+telnet 查询网络端口是否打通
+lsof -i 端口号   查看端口占用
+tail 查询文件行数
+grep 搜索文件
+top 查看内核内存和cpu
+kill -9 进程号 杀死进程
+ps -ef 查询进程
+tar 对文件进行tar压缩
+zip 对文件进行zip压缩
+ssh 连接服务器
+df 查看磁盘大小
+scp 从本地复制到远程
+wget 下载文件
+vim 修改文件
+find 查找文件
+mkdir 创建目录
+touch 新建文件
+rm 删除文件
+chmod 权限修改
+
+设计一个登陆系统
+token加密使用jwt
+设计模式可以使用责任链模式
+
+jwt
+组成：
+Header 头部：一般为token类型和加密算法
+Payload 负载：一些用户信息和额外的声明数据
+Signature 签名：签名需要使用编码后的header和payload以及一个秘钥 （很安全），前两段的结合加密
+header一般保存编码方式，一般采用HMAC采用HS512算法
+payload是自定义的可以保存一些用户姓名，权限等信息，还会默认保存创建时间和过期时间
+signature里面保存的是一段真正加密的token可以根据自己的密钥加密一段base64，没有密钥无法破解
+前两段都可以通过base64直接解码获取的信息
+
+链路监控开源组件
+zipkin
+pinpoint
+skywalking
+cat
+spring cloud slueth
+
+时间轮
+是一个由数组作为环，每个数组节点由双向链表组成的一个定时器，当指针顺时针旋转到当前数组节点，会获取链表中的数据并且执行
+netty和dubbo，中的HashedWheelTimer就是一个时间轮的实现类
+
+一致性hash
+生成一个hash环，设置每个节点，当一个hash请求进来后会自动寻找到“顺时针”的下一个最近的节点
+实现一致性hash的方式
+new一个treeMap（红黑树）put对应的节点，然后可以使用tailMap方法获取大于或者等于当前节点的子节点，选取其中的第一个，headMap可以获取小于等与当前节点的子节点
+
+雪花算法
+64bit组成，0开头，41位的时间戳，10bit 工作机器id，12bit 序列号组成
+
+限流算法
+计数器
+滑动窗口
+漏桶（控制传输速率）
+令牌桶
+
+cap理论
+c：一致性
+a：可用性
+p：分区容错性
+zookeeper是cp
+nameserver是ap
+
+分布式锁
+redis
+DB
+zookeeper
+
+拜占庭问题算法
+Paxos
+Reft

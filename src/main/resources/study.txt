@@ -2364,7 +2364,7 @@ https://juejin.im/post/5e6ed292f265da57434bd359 排序  https://www.jianshu.com/
 https://www.jianshu.com/p/5dd5993f981b 	可能是全网最好的MySQL重要知识点
  
  TCP的三次握手，简述：我连你，你同意，我再连你（成功）。
-
+https://www.cnblogs.com/bj-mr-li/p/11106390.html tcp三次握手四次挥手 很全面
 
 TCP的四次挥手（要说byebye了），简述：我要关闭，你同意，你要关闭，我同意你先关闭我再关闭。
 客户端–发送带有SYN标志的数据包–一次握手–服务端

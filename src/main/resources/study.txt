@@ -2098,6 +2098,15 @@ ApplicationContext事件机制是观察者设计模式的实现，通过Applicat
     after-throwing: 在方法抛出异常退出时执行的通知。
     around: 在方法执行之前和之后调用的通知。
 
+191.AOP 失效？（同一个类方法内部嵌套方法）https://cloud.tencent.com/developer/article/1099494
+答：同一个类 方法里面调用另外一个同类方法。并且2个方法都有切面。a和b  b的aop失效
+  解决办法：1.把b单独写个类去调
+           2.Spring AOP为我们提供了获取当前上下文代理对象的方法 首先需要在AOP配置里暴露代理对象，
+             在Spring Boot中可以通过注解@EnableAspectJAutoProxy(exposeProxy = true)进行配置：
+          Logsevcer o = (Logsevcer)AopContext.currentProxy();
+          同类通过apo代理出类再去调同类的b方法
+  失效的原因：aop是通过代理生成代理对象，代理对象只会对横切面的方法进行增强。而嵌套的方法压根就没被生成对象怎么增强
+  核心就是aop是代理 生成切面
 
 
 优点：性格开朗，遇事沉着冷静，做事有责任心，有团队精神，擅长与人沟通 
@@ -2607,6 +2616,7 @@ public void refresh() throws BeansException, IllegalStateException {
 自己有什么优势？
 1.可以带领独立团队完成任务
 2.多年的技术积累可以解决遇到的各种问题
+3.用心 创造力
 
 秒杀架构：
 1.seckillEngineService  生产12个节点 （这里就要把大部分用户过滤掉）秒杀前置服务：主要作用就是限流、验证码、黑名单、验证活动、验证库存

@@ -262,7 +262,8 @@ MinorGC 的过程（复制->清空->互换）MinorGC 采用复制算法。
        
 13.redis的数据结构？ https://www.runoob.com/redis/redis-lists.html
 答：string hash set(通过hashtable实现的) list(简单的字符串列表，按照插入顺序排序,双向链表，既可以支持反向查找和遍历，更方便操作，不过带来了额外的内存开销,粉丝列表都可以用list结构来实现) sortset
-   1.sorted set：实现top数据取值。存入的时候回存入一个scope分值，可以根据分值的排序取出数据。指定区间内，带有score值的有序集成员的列表。	我的收藏七天数据根据sortset实现(内部使用HashMap和跳跃表(skipList)来保证数据的存储和有序，HashMap里放的是成员到score的映射，而跳跃表里存放的是所有的成员，排序依据是HashMap里存的score)
+   1.sorted set：实现top数据取值。存入的时候回存入一个scope分值，可以根据分值的排序取出数据。指定区间内，带有score值的有序集成员的列表。
+   	 我的收藏七天数据根据sortset实现(内部使用HashMap和跳跃表(skipList)来保证数据的存储和有序，HashMap里放的是成员到score的映射，而跳跃表里存放的是所有的成员，排序依据是HashMap里存的score)
    2.发布订阅publish/subscribe:使用ehcache各个服务器节点同步数据
    3.lua脚本可以保证原子性
    4.可以用作分布式锁；setNx	
@@ -286,6 +287,10 @@ MinorGC 的过程（复制->清空->互换）MinorGC 采用复制算法。
    list采取的双端链表linklist，压缩列表ziplist。
    set是hashtable和inset 。
    zset是ziplist和skiplist。
+   
+   跳跃表：是一种有序的数据结构，每个节点中存放多个指针（维护多个指向其他节点的指针），从而达到快速访问节点的目的 
+         跳跃表支持平均 O(logN)、最坏 O(N) 复杂度的节点查找， 还可以通过顺序性操作来批量处理节点。
+         在大部分情况下， 跳跃表的效率可以和平衡树相媲美， 并且因为跳跃表的实现比平衡树要来得更为简单， 所以有不少程序都使用跳跃表来代替平衡树
    
 13.redis数据结构hash?
 答：redis的hash结构底层是hashtable和ziplist（压缩链表），什么时候使用哪个可以在redis.conf文件中配置

@@ -1,0 +1,34 @@
+https://mp.weixin.qq.com/s/ewwemWh7XOsX-H9Q3QPh8g 一些常用工具类
+1.对象比较
+当我们用equals比较两个对象是否相等的时候，还需要对左边的对象进行判空，不然可能会报空指针异常，我们可以用java.util包下Objects封装好的比较是否相等的方法
+    boolean equals = Objects.equals(a2, n);
+2. 两个List集合取交集
+  List<String> list1 = new ArrayList<>();
+  list1.add("a");
+  list1.add("b");
+  list1.add("c");
+  List<String> list2 = new ArrayList<>();
+  list2.add("a");
+  list2.add("b");
+  list2.add("d");
+  list1.retainAll(list2);
+  System.out.println(list1); // 输出[a, b]    
+3.格式化日期
+ 再也不用手写SimpleDateFormat格式化了
+ // Date类型转String类型
+ String date = DateFormatUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss");. 
+ // String类型转Date类型
+ Date date = DateUtils.parseDate("2021-05-01 01:01:01", "yyyy-MM-dd HH:mm:ss");
+ 
+ // 计算一个小时后的日期
+ Date date = DateUtils.addHours(new Date(), 1);
+ 
+4.包装临时对象
+  当一个方法需要返回两个及以上字段时，我们一般会封装成一个临时对象返回，现在有了Pair和Triple就不需要了
+  // 返回两个字段
+  ImmutablePair<Integer, String> pair = ImmutablePair.of(1, "yideng");
+  System.out.println(pair.getLeft() + "," + pair.getRight()); // 输出 1,yideng
+  // 返回三个字段
+  ImmutableTriple<Integer, String, Date> triple = ImmutableTriple.of(1, "yideng", new Date());
+  System.out.println(triple.getLeft() + "," + triple.getMiddle() + "," + triple.getRight()); /
+  

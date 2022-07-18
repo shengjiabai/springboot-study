@@ -1,0 +1,76 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml
+
+@startuml
+title Sequence Diagram of User login
+actor User as user
+
+participant "gateway" as gateway
+participant "user-core" as userCore
+database "MySQL" as mysql
+database "Redis" as redis
+
+autonumber
+user-> gateway:login request，param：username，password
+activate gateway
+gateway-> userCore:forward the login request
+activate userCore
+userCore-> userCore :check the login param
+userCore-> mysql:query user info from mysql by username
+activate mysql
+mysql-> userCore:response with username and password
+deactivate mysql
+userCore->userCore:compare the requested password with the DB's password
+userCore-> userCore: generate an unique token
+userCore--> redis: save the token to redis
+userCore-> gateway: response with the token
+deactivate userCore
+gateway-> user: login success with the token
+deactivate gateway
+@enduml
+
+关键词解释如下:
+
+title:表示该UML用例图的标题
+actor:表示人形的参与者
+as: 使用as 关键字命名参与者。你可以把它理解成定义变量一样,as后面跟着的就是变量,声明后,我们后面就可以使用这个变量啦
+participant:表示普通的参与者,它跟actor的主要区别是:形状不一样
+database:表示参与者形状是数据库.
+显示的顺序是怎么定义的:声明的参与者顺序将是（默认的）显示顺序。
+autonumber:可以给参与者添加顺序
+->:表示绘制两个参与者之间的信息,如果你希望是虚线,可以使用-->.
+activate和deactivate:表示参与者的生命线
+
+@startuml
+Alice -> Bob: 认证请求
+
+alt 登录成功
+
+    Bob -> Alice: 认证接受
+
+else 某种失败情况
+
+    Bob -> Alice: 认证失败
+    group 我自己的标签
+    Alice -> Log : 开始记录攻击日志
+        loop 1000次
+            Alice -> Bob: DNS 攻击
+        end
+    Alice -> Log : 结束记录攻击日志
+    end
+
+else 另一种失败
+
+   Bob -> Alice: 请重复
+
+end
+@enduml

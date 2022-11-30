@@ -1,0 +1,180 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+autonumber
+
+Alice -> Bob: Authentication Request
+Bob --> Alice: Authentication Response
+
+Alice -> Bob: Another authentication Request
+Alice <-- Bob: another authentication Response
+@enduml
+
+@startuml
+title 用户确认订单
+actor User as user
+
+participant "订单中心" as gateway
+participant "营销中心" as userCore
+participant "订单促销中心" as mysql
+participant "订单计费中心" as redis
+
+autonumber
+user-> gateway:发起确认订单
+activate gateway
+gateway-> userCore:官网渠道订单获取促销信息
+activate userCore 
+activate mysql 
+userCore-> mysql :解析满减活动
+userCore-> mysql :解析特价活动
+userCore-> mysql :解析抢购活动
+userCore-> mysql :解析折上折活动
+userCore-> mysql :解析优惠券
+userCore-> mysql :<color:red>解析现金支付券</color>
+userCore-> mysql :解析抽奖赠品
+deactivate userCore
+
+'activate mysql
+'userCore-> gateway: response with the token
+activate redis
+mysql-> redis :分摊商品实付金额
+mysql-> redis :运费计算
+
+deactivate mysql
+deactivate gateway
+redis-> user: 现金券信息返回到确认订单页
+deactivate gateway
+@enduml
+
+@startuml
+title 用户使用现金券AND支付AND创建订单AND取消订单
+actor User as user
+
+participant "订单中心" as gateway
+participant "商品中心" as mysql
+participant "权益中中心" as redis
+participant "订单计费中心" as userCore
+participant "营销中心" as mak
+participant "支付中心" as zhifu
+
+autonumber
+user-> gateway:用户确认订单页（商品id/购买数量/项目id）
+activate gateway
+gateway-> mysql:获取商品相关信息
+activate mysql
+
+deactivate gateway
+mysql-> user: 返回到确认订单页
+
+
+deactivate mysql
+user-> gateway:用户选择支付方式
+activate gateway
+
+gateway-> redis:权益中心获取支付数据
+activate redis
+
+redis->userCore :抵扣现金券优惠金额
+deactivate redis
+
+activate userCore 
+deactivate gateway
+userCore-> user: 返回到确认订单页
+deactivate userCore
+
+user-> gateway:用户提交订单
+activate gateway
+gateway-> mak:营销中心扣减现金券
+deactivate gateway
+activate mak
+deactivate userCore
+mak-> user: 创建订单成功
+deactivate mak
+
+user-> gateway:用户取消订单OR超时取消
+activate gateway
+gateway-> zhifu:部分支付进行退款
+
+
+activate zhifu
+zhifu-> gateway: 支付退款成功
+deactivate zhifu
+
+gateway-> mak:部分支付进行退款
+deactivate gateway
+activate mak
+mak-> user: 取消订单成功
+deactivate mak
+
+
+
+
+
+
+
+
+
+@enduml
+
+@startuml
+
+autonumber
+
+actor "用户" as User
+participant "浏览器" as Browser
+participant "服务端" as Server #orange
+
+activate User
+
+User -> Browser: 输入 URL
+activate Browser
+
+Browser -> Server: 请求服务器
+activate Server
+
+Server -> Server: 模板渲染
+note right of Server: 这是一个注释
+
+Server -> Browser: 返回 HTML
+deactivate Server
+
+Browser --> User
+
+@enduml
+
+关键词解释如下:
+
+title:表示该UML用例图的标题
+actor:表示人形的参与者
+as: 使用as 关键字命名参与者。你可以把它理解成定义变量一样,as后面跟着的就是变量,声明后,我们后面就可以使用这个变量啦
+participant:表示普通的参与者,它跟actor的主要区别是:形状不一样
+database:表示参与者形状是数据库.
+显示的顺序是怎么定义的:声明的参与者顺序将是（默认的）显示顺序。
+autonumber:可以给参与者添加顺序
+->:表示绘制两个参与者之间的信息,如果你希望是虚线,可以使用-->.
+activate和deactivate:表示参与者的生命线
+
+@startuml
+Alice -> Bob: 认证请求
+
+alt 登录成功
+
+    Bob -> Alice: 认证接受
+
+else 某种失败情况
+
+    Bob -> Alice: 认证失败
+    group 我自己的标签
+    Alice -> Log : 开始记录攻击日志
+        loop 1000次
+            Alice -> Bob: DNS 攻击
+        end
+    Alice -> Log : 结束记录攻击日志
+    end
+
+else 另一种失败
+
+   Bob -> Alice: 请重复
+
+end
+@enduml

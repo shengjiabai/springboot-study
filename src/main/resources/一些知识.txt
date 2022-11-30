@@ -207,7 +207,13 @@ ribbon:
         </configuration>
     </plugin>
     
-20.        
+20. mysql字符串函数 find_in_set(str1,str2) 函数是返回 str2 中 str1 所在的位置索引，str2必须以 "," 分割开。   
+
+lists 存的数据是 1,2,3
+  select * from user where find_in_set("2",lists);
+
+
+ 
 	
 reactor 	 [化工] 反应器；[核] 反应堆；起反应的人
 Proactor  前摄器 主动器 前摄器模式 异步情况下
@@ -248,3 +254,15 @@ Proactor  前摄器 主动器 前摄器模式 异步情况下
  总结
  　　总的来说，在微服务架构，如果使用了Spring Cloud生态的基础组件，则Spring Cloud Gateway相比而言更加具备优势。
 	
+	
+	
+	本地项目启动采用JVM环境变量与springboot启动参数来设置，由于采用了Apollo配置中心，所有的配置全部放到Apollo中，当本地需要临时修改某些配置用于调试，请将env设置为local
+    范例如下：
+    JVM参数：
+    -Denv=local // 这个是本地调试需要频繁修改配置的时候添加的，正常情况下不添加
+    -Dapollo.cacheDir=env/dev // 将配置文件拉到本地开发目录下，请务必在.ignore文件中添加/env的忽略目录，不然文件会被提交，好处是当env设置为local的时候可以方便的修改我们的配置环境变量
+    -Dfile.encoding=utf-8 // 文件编码，不做要求
+    springboot参数：
+    --spring.cloud.service-registry.auto-registration.enabled=false // 不注册服务
+    --spring.zipkin.enabled=false // 这个是针对zipkin的，test环境的zipkin无人维护，不需要开启
+    --spring.schedulerx2.enabled=false // 这个是针对schedulerX2的开关，置为false本地就不会注册到调度机器列表中

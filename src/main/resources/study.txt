@@ -1957,6 +1957,10 @@ https://blog.csdn.net/zzti_erlie/article/details/80358564
 171.策略模式？
 答：策略模式还挺简单的，就是定义一个接口，然后有多个实现类，每种实现类封装了一种行为。然后根据条件的不同选择不同的实现类。
  优化if else 
+ 我们经常在写接口的时候，会使用到了@PathVariable、@RequestParam、@RequestBody等注解，一旦我们使用了注解，SpringMVC会处理注解，从请求中获取到参数，然后再调用接口传递过来，而这个过程，就使用到了策略模式。
+ 对于这类参数的解析，SpringMVC提供了一个策略接口HandlerMethodArgumentResolver
+  boolean supportsParameter(MethodParameter parameter); 是否支持
+  Object resolveArgument(MethodParameter parameter, 
  
 172.ES解释doc_values和fielddata？
 答：doc value 是在排序，分组，聚合使用正排索引等 需要文档映射到具体字段的一种正向索引，适用于很多类型字段，存储在磁盘上。
@@ -2164,6 +2168,12 @@ ApplicationContext事件机制是观察者设计模式的实现，通过Applicat
 答：消息消费模式有两种：Clustering（集群消费）和Broadcasting（广播消费）。
     1.默认情况下就是集群消费，这种模式下一个消费者组共同消费一个主题的多个队列，一个队列只会被一个消费者消费，如果某个消费者挂掉，分组内其它消费者会接替挂掉的消费者继续消费。
     2.广播消费消息会发给消费者组中的每一个消费者进行消费。
+    rockmq 集群模式和广播模式区别？
+        答：默认是集群模式
+           1.集群模式：一个消费者要是有多个实例，只有一个实例会消费到该消息。而不是所有的实例同时消费同一个实例
+           2.广播模式：一个消费者要是有多个实例，每个实例都可以接收到同一个消息
+        广播模式下，消息队列 RocketMQ 保证每条消息至少被每台客户端消费一次，但是并不会对消费失败的消息进行失败重投，因此业务方需要关注消费失败的情况
+   
 
 
 202.mysql都有哪些锁？

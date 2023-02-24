@@ -2194,7 +2194,18 @@ ApplicationContext事件机制是观察者设计模式的实现，通过Applicat
    在读已提交隔离级别下，加的是record lock
 
    共享锁和排他锁 是行锁的  
-
+   
+203.大事务问题一般要如何解决？ https://developer.aliyun.com/article/1165685
+答：大事务产生的问题：死锁、接口超时、锁等待、回滚时间长、数据库主从延迟、并发情况下数据库连接池被沾满
+如何避免大事务：
+  a.少用 @Transactional 注解 
+  我们知道 @Transactional 注解是通过 spring 的 aop 起作用的，但是如果使用不当，事务功能可能会失效。如果恰巧你经验不足，这种问题不太好排查。至于事务哪些情况下会失效
+  @Transactional 注解一般加在某个业务方法上，会导致整个业务方法都在同一个事务中，粒度太粗，不好控制事务范围，是出现大事务问题的最常见的原因。
+ b.可以使用编程式事务，在 spring 项目中使用 TransactionTemplate 类的对象，手动执行事务。（推荐）
+     @Autowired
+    private TransactionTemplate transactionTemplate;
+ c.将查询 (select) 方法放到事务外  
+ 3. 在该 Service 类中使用 AopContext.currentProxy () 获取代理对象
 
 https://zhuanlan.zhihu.com/p/50527184  CTO、技术VP、技术总监、首席架构师的区别？技术管理者的核心能力是什么
 

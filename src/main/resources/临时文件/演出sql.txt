@@ -1,0 +1,405 @@
+SELECT COUNT(1),SUM(total_payment) from mall_order  m LEFT JOIN mall_order_goods g on m.order_no=g.order_no where g.gift_type=7 and m.creation_time > '2023-05-25 00:00:00'
+
+
+SELECT m.order_no,m.total_payment,g.gift_type,SUM(total_payment) from mall_order  m LEFT JOIN mall_order_goods g on m.order_no=g.order_no where g.gift_type=7 and m.creation_time > '2023-05-25 00:00:00'
+
+SELECT * from t_order_promotion_item where order_no='21230525214203820596';
+
+
+SELECT * from dffl_mall_db4.mall_order where order_no='22230718183400005088';
+SELECT COUNT(1) from dffl_mall_db4.mall_category where channel=2 and deleted=0;
+
+SELECT COUNT(1) from dffl_mall_db4.mall_goods where channel=6 and deleted=0;
+
+SELECT * from dffl_mall_db4.mall_order_goods where goods_id=4516832
+
+SELECT * from dffl_mall_db4.mall_goods where id=82312
+SELECT * from dffl_mall_db4.mall_goods where channel=6  order by id desc  limit 10 ;
+SELECT * from dffl_common.t_brand   where id=360;
+
+SELECT * from dffl_common.t_brand   where id=9365;
+
+
+SELECT COUNT(DISTINCT(id)) from dffl_mall_db4.mall_goods where can_sell=1 and  channel=6 and status =1
+
+SELECT COUNT(DISTINCT(id)) from dffl_mall_db4.mall_goods where can_sell=1 and  channel=6 and status =1
+
+SELECT COUNT(1) from dffl_mall_db4.mall_goods where can_sell=1 and  channel=6 and status =2
+
+SELECT COUNT(1) from dffl_mall_db4.mall_goods where modification_time > '2023-07-17 00:00:05' and  channel=6 and status !=1
+
+SELECT COUNT(1) from dffl_mall_db4.mall_goods where modification_time > '2023-07-17 00:00:05' and  channel=6 and status =1
+
+select count(1)  from dffl_order.t_order where create_at >"2023-08-20 00:00:05" and order_status in (2,5)
+
+select *  from dffl_order.t_order_item where order_no='21230820231800444695'
+
+
+
+  select
+       *
+        from  dffl_mall_db4.mall_ticket_price
+        where goods_id = 290696 and deleted = 0
+        
+              select min(show_start_time) as showStartTime,
+               max(show_end_time)   as showEndTime
+        from dffl_mall_db4.mall_ticket_perform
+        where goods_id = 290696
+          and deleted = 0
+        group by goods_id
+        
+          select
+       *
+        from
+        dffl_mall_db4.mall_ticket_perform
+        where
+     
+            goods_id = 290696 and
+  
+        deleted = 0 order by show_start_time
+
+
+
+ select
+      COUNT(1)
+        from  dffl_mall_db4.mall_show_auxiliary
+where
+                 project_status in(1)
+
+
+
+mall_goods 演出商品表    channel DRAMA(6, "演出"),
+
+
+SELECT * from dffl_mall_db4.mall_order where order_no='21230725223600079974';
+
+SELECT * from mall_order_goods where order_no='21230422225002333062';
+
+select * from dffl_mall_db4.mall_order_goods where order_no='21230701091807733827'
+
+select * from  dffl_mall_db4.mall_delivery_order where order_no = '21230903231600138526'
+
+select * from  dffl_mall_db4.biz_event where order_no = '23230612181200047996'
+
+select * from  dffl_mall_db4.mall_delivery_order_ext_log where order_no = '23230612181200047996'
+
+select * from  dffl_mall_db4.mall_delivery_order_express where delivery_order_no = '23230612181200047996'
+
+
+
+
+
+SELECT * from dffl_payment.t_payment_order where channel_sn='21230630233800414309';
+
+SELECT * from dffl_payment.t_payment_order_payway where order_sn='216795729381511272100067198';
+
+SELECT * from dffl_payment.t_payment_refund_order  where pay_order_sn='21688139540911947631804842';
+
+SELECT * from  so  where order_no='20230719222342869120';
+SELECT * from  so_track  where order_no='20230615223655171512';
+
+SELECT * from dffl_mall_db4.mall_order_ext where order_no='21230622202200060497'
+
+SELECT * from dffl_mall_db4.mall_goods where id=289753
+
+SELECT * from dffl_mall_db4.mall_goods_spu where id=155807
+
+-- 演出商品详情表
+SELECT * from dffl_mall_db4.mall_show_auxiliary where goods_id=289803
+
+SELECT * from dffl_mall_db4.mall_delivery_order_goods where id =43101027
+
+-- 运单商品票务表
+SELECT * from dffl_mall_db4.mall_delivery_order_goods_ticket where id =43101027
+
+SELECT * from dffl_mall_db4.mall_delivery_order_goods_ticket where supplier_project_Id =214201008
+
+SELECT * from dffl_mall_db4.mall_delivery_order_goods_ticket where order_no in ("21230725223600079974")
+
+SELECT * from dffl_mall_db4.mall_delivery_order_goods_ticket where merchant_order_no='10773096410425' and merchant_sub_order_no='9098535810508'
+
+SELECT * from dffl_mall_db4.mall_delivery_order_goods_ticket where merchant_order_no in('10773096410425','10503545480451','10421027790731')
+
+SELECT qr_code,qr_code_type,exchange_code from dffl_mall_db4.mall_delivery_order_goods_ticket where merchant_order_no='9098535800508' and merchant_sub_order_no='9098535810508'
+
+[
+	{
+	
+		"exchangeCode": "23011887",
+		"merchantOrderNo": "9098535800508",
+		"merchantSubOrderNo": "9098535810508",
+		"qrCodeType":3
+	}
+]
+
+
+SELECT * from dffl_mall_db4.mall_delivery_order_goods_ticket where perform_issue_enter_modes_list=2 and qr_code ='' limit 1
+
+SELECT qr_code_type from dffl_mall_db4.mall_delivery_order_goods_ticket group by seat_choose_type
+qr_code_type
+
+  select
+      *
+        from dffl_mall_db4.mall_delivery_order_goods_ticket
+        where supplier_perform_id = '211349070' and qr_code = '' 
+
+-- 查询电子票没有出码的
+SELECT t.* from dffl_mall_db4.mall_order m 
+LEFT JOIN dffl_mall_db4.mall_delivery_order_goods_ticket t using(order_no)
+where m.order_type=8 and m.creation_time > '2023-08-20 00:00:00' and order_status in(2,5,6) and  t.perform_issue_enter_modes_list=2 and t.qr_code ='' and t.qr_code_type = 0; 
+
+SELECT t.* from dffl_mall_db4.mall_order m 
+LEFT JOIN dffl_mall_db4.mall_delivery_order_goods_ticket t using(order_no)
+LEFT JOIN dffl_mall_db4.mall_show_supplier_order s  using(order_no)
+where m.order_type=8 and m.creation_time > '2023-06-01 00:00:00' and order_status in(2,5,6) and  t.perform_issue_enter_modes_list=1 and t.perform_take_ticket_type =2 and s.sale_type =2; 
+
+SELECT t.* from dffl_mall_db4.mall_order m 
+LEFT JOIN dffl_mall_db4.mall_delivery_order_goods_ticket t using(order_no)
+where m.order_type=8 and m.creation_time > '2023-03-01 00:00:00' and order_status in(2,5,6) and  t.perform_issue_enter_modes_list=1  and t.perform_take_ticket_type=4 
+
+SELECT * from  dffl_mall_db4.mall_show_supplier_order where creation_time > "2023-05-08 12:01:11" and creation_time < "2023-06-08 12:01:11" and 
+sale_type = 2 limit 10
+
+SELECT * from  dffl_mall_db4.mall_show_supplier_order  where order_no="21230725223600079974" 21230725223600079974  21230721102800012898
+  `perform_issue_enter_modes_list` tinyint(3) DEFAULT NULL COMMENT '入场方式 1纸质票入场 2电子票入场',
+ 优先看这个 `perform_issue_ticket_type` tinyint(3) DEFAULT NULL COMMENT '出票方式 1纸质票 2静态二维码电子票 3动态二维码电子票 4身份证电子票 5 短信码电子票',
+  `perform_take_ticket_type` tinyint(3) DEFAULT NULL COMMENT '取票类型1，无纸化;2，快递票;3，自助换票;4，门店自取。1 和 3 为电子票，2 和 4 为纸质票。',
+
+
+perform_take_ticket_type
+
+SELECT *from so where order_no='21230701091807733827'
+
+
+SELECT * from  dffl_mall_db4.mall_delivery_order_goods_ticket where  sub_order_no ='21230721191800119035'
+SELECT * from  dffl_mall_db4.mall_delivery_order_goods_ticket where  order_no ='21230713120100034016'
+
+SELECT * from  dffl_mall_db4.mall_delivery_order_goods_ticket where  seat_entry != '' limit 1
+seat_entry
+
+-- so库
+
+SELECT * FROM bfd_oms.so where order_channel_code='YONGHUI' and ext1 is not null ORDER BY id  desc ;
+
+SELECT * from   bfd_oms.so  where order_no='20230822223649173395';
+SELECT * from   bfd_oms.so_track  where order_no='20230816093810001808';
+
+SELECT * from   bfd_oms.so_return  where order_no='20230720141031886246';
+
+SELECT * from   bfd_oms.so_return_item   where return_no='RD20230721143615886279';
+
+SELECT * from   bfd_oms.so_return_item   where return_no='20230816093810001808';
+
+
+--  dffl_ordercenter.t_ordermerge_config
+SELECT * from dffl_ordercenter.t_ordermerge_config
+
+SELECT * from dffl_ordercenter.t_ordermerge_terminal_config
+
+SELECT * from dffl_ordercenter.t_ordermerge_terminal_config where order_type=44
+
+
+
+SELECT * from dffl_mall_db4.mall_order_log where order_no ="21230323200200045605"
+
+SELECT * from dffl_mall_db4.mall_delivery_order_ext_log where order_no ="21230323200200045605"
+
+SELECT DISTINCT(m.order_no) from dffl_mall_db4.mall_order  m 
+LEFT JOIN dffl_mall_db4.mall_delivery_order_goods_ticket g 
+on m.order_no = g.order_no 
+ where  m.creation_time between '2023-05-01 00:00:00' and '2023-05-31 23:59:59'  and g.supplier_project_Id =213936029
+ 
+  SELECT DISTINCT(i.value1),i.* from dffl_mall_db4.mall_order  m 
+  
+SELECT DISTINCT(i.value1) from dffl_mall_db4.mall_order  m 
+-- SELECT  sum(cast(i.value15 AS DECIMAL (12,2)))  from dffl_mall_db4.mall_order  m
+ 
+LEFT JOIN dffl_mall_db4.mall_delivery_order_goods_ticket g on m.order_no = g.order_no 
+LEFT JOIN finance.hscs_intermediate_interface i on m.order_no = i.value1  and i.interface_name='虚拟结算单接口'
+ where  m.creation_time between '2023-05-01 00:00:00' and '2023-05-31 23:59:59'  and g.supplier_project_Id =214988037
+ 
+ 
+ 
+ 
+ 
+-- 演出商品表
+SELECT * from dffl_mall_db4.mall_goods where channel = 6 and `status`=1 limit 1
+
+SELECT * from dffl_mall_db4.mall_goods where id=887938
+SELECT * from dffl_mall_db4.mall_goods where channel = 6 and name like '%行走的故宫%'
+
+-- 三方订单表
+SELECT * from dffl_mall_db4.mall_show_supplier_order  where third_order_no='10503545490451'   order_no in("21230708120100103984");
+   issueTicketType  PAPER(1, "纸质票"),
+    STATIC_QR_CODE_ELECTRON(2, "静态二维码电子票"),
+    DYNAMIC_QR_CODE_ELECTRON(3, "动态二维码电子票"),
+    ID_ELECTRON(4, "身份证电子票"),
+    SMS_ELECTRON(5, "短信电子票");
+    
+    SELECT * from dffl_mall_db4.mall_show_supplier_order  where third_order_no ="6498736710599"
+
+SELECT * from dffl_mall_db4.mall_order where order_type=8 and creation_time between '2023-05-31 00:00:00' and '2023-05-31 23:59:59' and order_status in(2,5,6) group by date_format(creation_time, '%Y-%m-%d');
+
+
+SELECT  date_format(creation_time, '%Y-%m-%d') "日期",count(1) "订单数" ,count(distinct(user_id)) "订单人数",sum(total_payment) "订单金额" from dffl_mall_db4.mall_order where order_type=8 and creation_time > '2023-06-13 00:00:00' and order_status in(2,5,6) group by date_format(creation_time, '%Y-%m-%d');
+
+SELECT *,user_id from dffl_mall_db4.mall_order where order_type=8 and creation_time > '2023-06-06 00:00:00' and order_status in(2,5,6); 
+
+SELECT count(user_id),user_id from dffl_mall_db4.mall_order where order_type=8 and creation_time > '2023-06-06 00:00:00' and order_status in(2,5,6) group by user_id; 
+
+SELECT *,user_id from dffl_mall_db4.mall_order where order_type=8 and creation_time > '2023-06-06 00:00:00' and order_status in(2,5,6) and user_id=7137632; 
+
+SELECT  date_format(m.creation_time, '%Y-%m-%d') "日期",count(1) "退单数" ,sum(r.amount) "退单金额" from dffl_mall_db4.mall_order m 
+right JOIN dffl_mall_db4.mall_refund_order r on m.order_no=r.order_no 
+where m.order_type=8 and m.creation_time > '2023-06-13 00:00:00' and r.refund_order_status=5 and r.refund_order_substatus=502  group by date_format(m.creation_time, '%Y-%m-%d');
+
+SELECT  r.* from dffl_mall_db4.mall_order m 
+right JOIN dffl_mall_db4.mall_refund_order r on m.order_no=r.order_no 
+where m.order_type=8 and m.creation_time > '2023-06-06 00:00:00' 
+
+SELECT  * from dffl_mall_db4.mall_order_refund_payment m where  m.order_no='21230323200200045605'
+where m.order_type=8 and m.creation_time > '2023-06-06 00:00:00' 
+
+SELECT * from dffl_mall_db4.mall_order_log where order_no='21230709171100094502'
+
+
+
+
+
+SELECT date_format(m.creation_time, '%Y-%m-%d') "日期",
+g.channel,	count(distinct(m.order_no)) 
+FROM
+dffl_mall_db4.mall_order m  
+LEFT JOIN dffl_mall_db4.mall_order_goods g on m.order_no=g.order_no  
+WHERE  
+m.`union` = "eal" and m.creation_time > '2023-08-14 00:00:00' and g.channel in (2,41,17,42,999)  group by  date_format(m.creation_time, '%Y-%m-%d') ,g.channel;
+
+
+
+SELECT * from dffl_mall_db4.admin_url_route_config where source like "%/refundNew/callback%"
+
+
+-- finance.hscs_intermediate_interface
+select * from finance.hscs_intermediate_interface where value1 in('21230514140900115001','21230531090100234692')
+
+select * from finance.hscs_intermediate_interface where value1='21230725223600079974'
+
+select * from finance.hscs_intermediate_interface where value2='214857005'
+
+
+SELECT * from dffl_mall_db4.t_finance_message  where order_no in('21230725223600079974')
+
+SELECT * from dffl_mall_db4.t_finance_message  where order_no in('21230725223600079974')
+
+SELECT * from dffl_mall_db4.t_finance_message  where type=2 and created_at >'2023-09-01 16:46:04'	
+
+SELECT * from dffl_mall_db4.t_finance_message  where type=1 and created_at >'2023-08-28 16:46:04'	
+
+SELECT * from dffl_mall_db4.t_finance_message  where type=3 and  freight !=0  order by id desc limit 10 
+
+SELECT t.order_no,m.creation_time,t.created_at from dffl_mall_db4.t_finance_message t LEFT JOIN dffl_mall_db4.mall_order m on t.order_no=m.order_no  where t.type=1 and created_at >'2023-08-28 16:46:04'
+
+
+
+select count(*),distinct(value1) from finance.hscs_intermediate_interface where value5 between "2022-04-01 00:00:00" and "2023-04-01 00:00:00" and value3="订单支付" and value12="美团外卖"
+
+select count(*) from finance.hscs_intermediate_interface where value3="订单支付" and  value5 > "2022-04-01 00:00:00" limit 1  and "2023-04-01 00:00:00" and  and value12="美团外卖"
+
+
+SELECT  g.* from dffl_mall_db4.mall_order o 
+LEFT JOIN dffl_mall_db4.mall_delivery_order_goods_ticket g on g.order_no=o.order_no
+where o.order_type=8 and o.creation_time > '2023-06-07 00:00:00' and o.order_status in(2,5,6) 
+
+
+
+
+
+
+INSERT INTO
+  `t_finance_message`  (
+    `order_no`,
+    `pay_order_no`,
+    `delivery_order_no`,
+    `type`,
+    `vendor_settlement_price`,
+    `freight`,
+    `total_payment`,
+    `status`,
+    `created_at`,
+    `updated_at`
+  )
+VALUES
+  (
+    '21230506121800210981',
+    '21683346708128570140098807',
+    '23230506121800242985',
+    '2',
+    '720.00',
+    '10.00',
+    '730.00',
+    '0',
+    '2023-06-27 20:00:00',
+    '2023-06-27 20:00:00'
+  )
+  
+  {
+	"deliveryOrderNo": "23230509205000199766",
+	"freight": 10.00,
+	"orderNo": "21230509205000161905",
+	"payOrderNo": "216836366514501437937114363",
+	"status": 0,
+	"totalPayment": 786.00,
+	"type": 2,
+	"vendorSettlementPrice": 776.00
+}
+  
+  
+  db.deliveryMsg.find();
+  
+  # 随心兑门店
+select count(distinct `a`.`id`)
+from `dffl_common`.`t_salesroom` `a`
+         left join `dffl_common`.`t_merchant` `b` on `b`.`id` = `a`.`merchant_id`
+         left join `dffl_common`.`t_code_merchant_config` `c` on `c`.`merchant_id` = `b`.`id`
+where find_in_set('3', `b`.`channel`)
+  and `b`.`status` = 1
+  and `a`.`status` = 1
+  and `c`.`open_pay` = 1;
+
+# 蛋糕
+select count(distinct `t2`.`merchant_spu_id`)
+from `dffl_mall_db4`.`mall_category_goods` `t1`,
+     `dffl_center_goods`.`t_merchant_sku` `t2`
+where `t1`.`goods_id` = `t2`.`id`
+  and `t1`.`channel` = 3
+  and `t1`.`status` = 1
+  and `t2`.`status` = 1
+  and `t2`.`shelf_status` = 1;
+  
+  #电子券
+select count(1) from dffl_goods.t_code_goods where channel_id = 3 and status = 2;
+
+
+select * from dffl_goods.mall_coupon_refund_order_goods where code in ('439483366224','202610708492','245808581050')
+
+-- 乐象前端可见可售上架项目书统计：
+select count(1) from dffl_activity.t_project where deleted=0 and final_state=1;
+
+select * from dffl_mall_db4.mall_ticket_perform where id = 93732657;
+
+select * from dffl_mall_db4.mall_ticket_perform where goods_id=286134
+
+select * from dffl_mall_db4.mall_ticket_price where goods_id=292420   97148472
+
+select * from dffl_mall_db4.mall_goods where id=291391
+
+286134  290635 290634                     291391
+SELECT * from dffl_mall_db4.mall_goods where channel = 6 and name like '%望三十%'
+
+update mall_ticket_perform set issue_enter_modes_list = '[2]',issue_ticket_type='[2]',take_ticket_type='[1]' WHERE id = 93732657;
+
+//纸质票
+update mall_ticket_perform set issue_enter_modes_list = '[1]',issue_ticket_type='[1]',take_ticket_type='[2]' WHERE id = 93732657;
+
+//原始数据
+update mall_ticket_perform set issue_enter_modes_list = '[1,2]',issue_ticket_type='[2,1]',take_ticket_type='[1,3,2,4]' WHERE id = 93732657;

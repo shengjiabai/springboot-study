@@ -1,0 +1,322 @@
+-- 支付 prd_db1_slave2  dffl_payment
+select * from t_payment_order where channel_sn='516646148802147301900354';
+
+select * from t_payment_order where sn='21667183003028707315213709'
+
+select * from t_payment_order_payway where order_sn='21665965837832181143283226';
+
+select * from t_payment_order_backup where sn='215769337982146573486689';
+
+select * from t_payment_refund_order where pay_order_sn='21664524057229917171874137'
+
+select * from t_payment_refund_way where refund_order_sn='31664610602800045945'
+
+select * from t_payment_refund_notify_log where sn='31664610602800045945'
+
+
+-- 随心兑  prd_db1_slave2  dffl_goods
+
+select * from t_code_goods_order where sn='516645240572138311929458'    
+
+select * from t_code_goods_order where codes='469737661122'
+
+select * from t_code_goods_order where order_type=2 and order_channel is null order by id desc limit 10
+
+select * from t_code_goods_order_temp where order_no='516655581640015958843796'
+
+select * from t_code_goods_order_log where order_sn='516646024862134702749727'
+
+select * from t_salesroom where merchant_id=1743 and third_code=10030016
+
+select * from t_salesroom where id=18907
+
+select * from mall_coupon_refund_order where order_no='516645240572138311929458'
+select * from mall_coupon_refund_order_goods where refund_order_id='101709'
+select * from mall_coupon_refund_order_log where  order_no='516645240572138311929458'
+select * from mall_coupon_refund_order  order by id DESC limit 10
+
+select * from dffl_goods.mall_merchant_exchange where merchant_id = 3340
+
+select * from dffl_goods.mall_merchant_exchange where merchant_id =1743
+
+select *  from dffl_common.t_merchant  where id =21
+select * from mall_merchant_exchange where merchant_id = 26 and status = 1
+select * from t_code_api_code where order_sn='516645240572138311929458'    
+
+-------- //推财务数据
+select * from mall_coupons_syncdata where orderNo='516645240572138311929458'
+
+select * from mall_coupons_syncdata_artificial where orderNo='516619483612135817054497'
+
+select * from mall_coupons_refund_syncdata where orderNo='516645240572138311929458'
+
+select * from t_code_goods_financial where sn='516619483612135817054497'
+
+SELECT * from t_code_goods where id=884
+
+-- finance.hscs_intermediate_interface
+select * from hscs_intermediate_interface where value1='516645240572138311929458'
+
+
+
+-- 哈根达斯数据导出
+SELECT
+o.created_at as 订单创建时间,o.sn as 订单号,o.codes as 券号,o.amount as 付款金额,o.mer_price as 付款结算金额,r.verify_time as 核销时间, NULLIF(s.`name`,'') as 核销门店,r.o2o_merchant_code as 三方门店编码,IFNULL(c.`name`,o.city_name) AS 核销城市
+FROM dffl_goods.t_code_goods_order o
+INNER JOIN dffl_common.t_o2o_code_record r ON r.`code` = o.codes
+LEFT JOIN dffl_common.t_o2o_merchant m ON r.o2o_merchant_id = m.id
+LEFT JOIN dffl_common.t_salesroom s on r.o2o_merchant_code = s.third_code and s.merchant_id = o.merchant_id
+LEFT JOIN dffl_common.t_city c ON s.city_id = c.id
+where
+o.code_goods_id = 884 and o.merchant_id = 15  and o.status in
+(5,10)
+and r.verify_time >= '2022-08-01 00:00:00' and r.verify_time <= '2022-08-31 23:59:59'
+and o.verification_code = '1'
+AND r.`status` = 1
+ORDER BY r.verify_time DESC;
+
+
+select
+       a.sn as '订单号',
+       a.codes as '券号',
+       a.created_at as '订单创建时间',
+       b.verify_time as '核销时间',
+       a.mer_price as '付款结算金额',
+       b.o2o_merchant_code as '核销门店三方编码',
+       d.name as '核销门店',
+       d.id as '核销门店id'
+       ,b.*
+from
+dffl_goods.t_code_goods_order a,
+dffl_common.t_o2o_code_record b,
+dffl_common.t_o2o_merchant c,
+dffl_common.t_salesroom d
+where a.sn = '516655581640015958843796'
+and a.codes = b.code
+and b.o2o_merchant_id = c.id
+and c.relation_id = d.id
+
+and a.codes = '484996090128' limit 100;
+
+
+
+SELECT
+        s.`id`,
+        s.`merchant_id` AS merchantId,
+        s.`name`,
+        s.`en_name` AS enName,
+        s.`city_id` AS cityId,
+        s.`region_id` AS regionId,
+        s.`address`,
+        s.`en_address` AS enAddress,
+        s.`telephone`,
+        s.`business_hours` AS businessHours,
+        s.`status`,
+        s.`feature_intro` AS featureIntro,
+        s.`eat_out` AS eatOut,
+        s.`is_wifi` AS isWifi,
+        s.`parking_info` AS parkingInfo,
+        s.`settlement_merchant_id` AS settlementMerchantId,
+        s.`staff_telephone` AS staffTelephone,
+        s.`third_code` AS thirdCode,
+        s.longitude,
+        s.latitude,
+        s.`created_at` as createdAt,
+        m.brand_id AS brandId
+        FROM
+	        t_salesroom s
+        INNER JOIN t_merchant m ON s.merchant_id = m.id
+        INNER JOIN t_code_merchant_config c ON m.id = c.merchant_id
+        where
+        m.cooperation_type in (3,4) and s.status=1 and  m.status = 1
+            and s.city_id = 3 and s.region_id =28
+           and FIND_IN_SET(3, `channel`)
+            and c.open_pay = 1
+        order by s.created_at desc
+        
+        
+       SELECT
+        s.`id`,
+        s.`merchant_id` AS merchantId,
+        s.`name`,
+        s.`en_name` AS enName,
+        s.`city_id` AS cityId,
+        s.`region_id` AS regionId,
+        s.`address`,
+        s.`en_address` AS enAddress,
+        s.`telephone`,
+        s.`business_hours` AS businessHours,
+        s.`status`,
+        s.`feature_intro` AS featureIntro,
+        s.`eat_out` AS eatOut,
+        s.`is_wifi` AS isWifi,
+        s.`parking_info` AS parkingInfo,
+        s.`settlement_merchant_id` AS settlementMerchantId,
+        s.`staff_telephone` AS staffTelephone,
+        s.`third_code` AS thirdCode,
+        s.longitude,
+        s.latitude,
+        s.`created_at` as createdAt,
+        m.brand_id AS brandId
+        FROM
+	        t_salesroom s
+        INNER JOIN t_merchant m ON s.merchant_id = m.id
+        INNER JOIN t_code_merchant_config c ON m.id = c.merchant_id
+        where
+        m.cooperation_type in (3,4) and s.status=1 and  m.status = 1
+            and s.city_id = 3 and s.region_id =28
+           and FIND_IN_SET(3, `channel`)
+            and c.open_pay = 1
+        order by s.created_at desc
+        
+        
+SELECT
+        s.`id`,
+        s.`merchant_id` AS merchantId,
+        s.`name`,
+        s.`en_name` AS enName,
+        s.`city_id` AS cityId,
+        s.`region_id` AS regionId,
+        s.`address`,
+        s.`en_address` AS enAddress,
+        s.`telephone`,
+        s.`business_hours` AS businessHours,
+        s.`status`,
+        s.`feature_intro` AS featureIntro,
+        s.`eat_out` AS eatOut,
+        s.`is_wifi` AS isWifi,
+        s.`parking_info` AS parkingInfo,
+        s.`settlement_merchant_id` AS settlementMerchantId,
+        s.`staff_telephone` AS staffTelephone,
+        s.`third_code` AS thirdCode,
+        s.longitude,
+        s.latitude,
+        s.`created_at` as createdAt,
+        m.brand_id AS brandId
+        FROM
+	        t_salesroom s
+        INNER JOIN t_merchant m ON s.merchant_id = m.id
+        INNER JOIN t_code_merchant_config c ON m.id = c.merchant_id
+        where
+        m.cooperation_type in (3,4) and s.status=1 and  m.status = 1
+            and s.city_id = 3 and s.region_id =28
+           and FIND_IN_SET(3, `channel`)
+            and c.open_pay = 1
+        order by s.created_at desc
+        
+        
+       SELECT
+        s.`id`,
+        s.`merchant_id` AS merchantId,
+        s.`name`,
+        s.`en_name` AS enName,
+        s.`city_id` AS cityId,
+        s.`region_id` AS regionId,
+        s.`address`,
+        s.`en_address` AS enAddress,
+        s.`telephone`,
+        s.`business_hours` AS businessHours,
+        s.`status`,
+        s.`feature_intro` AS featureIntro,
+        s.`eat_out` AS eatOut,
+        s.`is_wifi` AS isWifi,
+        s.`parking_info` AS parkingInfo,
+        s.`settlement_merchant_id` AS settlementMerchantId,
+        s.`staff_telephone` AS staffTelephone,
+        s.`third_code` AS thirdCode,
+        s.longitude,
+        s.latitude,
+        s.`created_at` as createdAt,
+        m.brand_id AS brandId
+        FROM
+	        t_salesroom s
+        INNER JOIN t_merchant m ON s.merchant_id = m.id
+        INNER JOIN t_code_merchant_config c ON m.id = c.merchant_id
+        where
+        m.cooperation_type in (3,4) and s.status=1 and  m.status = 1
+            and s.city_id = 3 and s.region_id =28
+           and FIND_IN_SET(3, `channel`)
+            and c.open_pay = 1
+        order by s.created_at desc
+        
+        
+       SELECT
+        s.`id`,
+        s.`merchant_id` AS merchantId,
+        s.`name`,
+        s.`en_name` AS enName,
+        s.`city_id` AS cityId,
+        s.`region_id` AS regionId,
+        s.`address`,
+        s.`en_address` AS enAddress,
+        s.`telephone`,
+        s.`business_hours` AS businessHours,
+        s.`status`,
+        s.`feature_intro` AS featureIntro,
+        s.`eat_out` AS eatOut,
+        s.`is_wifi` AS isWifi,
+        s.`parking_info` AS parkingInfo,
+        s.`settlement_merchant_id` AS settlementMerchantId,
+        s.`staff_telephone` AS staffTelephone,
+        s.`third_code` AS thirdCode,
+        s.longitude,
+        s.latitude,
+        s.`created_at` as createdAt,
+        m.brand_id AS brandId
+        FROM
+	        t_salesroom s
+        INNER JOIN t_merchant m ON s.merchant_id = m.id
+        INNER JOIN t_code_merchant_config c ON m.id = c.merchant_id
+        where
+        m.cooperation_type in (3,4) and s.status=1 and  m.status = 1
+            and s.city_id = 3 and s.region_id =28
+           and FIND_IN_SET(3, `channel`)
+            and c.open_pay = 1
+        order by s.created_at desc
+        
+        SELECT * FROM t_code_merchant_config WHERE merchant_id=702
+        
+          SELECT * FROM t_salesroom WHERE city_id = 3
+          
+           SELECT * FROM  t_region where id=421
+           
+           SELECT * FROM  t_region where name="南山区"
+           
+           SELect * from t_city where id in(3,421)
+           
+            SELect * from t_district where id in(8,19)
+        
+        
+SELECT
+        s.`id`,
+        s.`merchant_id` AS merchantId,
+        s.`name`,
+        s.`en_name` AS enName,
+        s.`city_id` AS cityId,
+        s.`region_id` AS regionId,
+        s.`address`,
+        s.`en_address` AS enAddress,
+        s.`telephone`,
+        s.`business_hours` AS businessHours,
+        s.`status`,
+        s.`feature_intro` AS featureIntro,
+        s.`eat_out` AS eatOut,
+        s.`is_wifi` AS isWifi,
+        s.`parking_info` AS parkingInfo,
+        s.`settlement_merchant_id` AS settlementMerchantId,
+        s.`staff_telephone` AS staffTelephone,
+        s.`third_code` AS thirdCode,
+        s.longitude,
+        s.latitude,
+        s.`created_at` as createdAt,
+        m.brand_id AS brandId
+        FROM
+	        t_salesroom s
+        INNER JOIN t_merchant m ON s.merchant_id = m.id
+
+        where
+        m.cooperation_type in (3,4) and s.status=1 and  m.status = 1
+            and s.city_id = 3 
+           and FIND_IN_SET(3, `channel`)
+        
+        order by s.created_at desc

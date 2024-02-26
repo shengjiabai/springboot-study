@@ -20,3 +20,32 @@
 三方订单
 随心兑 电子券
 实体     
+
+
+bfd_oms.`so`                 7719298
+dffl_mall_db4.mall_order     31137529
+dffl_goods.t_code_goods_order  34852258
+dffl_ordercenter.t_ordermerge  83570951
+
+电子券 日均2万  随心兑7千 
+
+实体  日均3万
+
+
+https://developer.aliyun.com/article/1165685  大事务如何解决
+
+https://learn.lianglianglee.com/  技术摘抄
+                                  
+https://blog.csdn.net/crazymakercircle/article/details/134618917?spm=1001.2014.3001.5502 MySQL为何需要4M来双写？为什么redo不双写？
+
+http://jzzjf.rsj.sh.gov.cn/jzzjf/
+
+https://www.sojson.com/simple_json.html  
+
+select date_format(created_at, '%Y-%m-%d') as '下单日期',
+       count(1)                            as '下单订单数'
+from dffl_goods.t_code_goods_order
+where status = 5
+  and order_type = 1
+  and created_at >= date_sub(CURDATE(), interval 1 month)
+group by 下单日期;

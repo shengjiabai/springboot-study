@@ -980,6 +980,13 @@ b.三阶段提交
 3. 补偿事务(TCC=Try-Confirm-Cancel)
 4. 本地消息队列表(MQ)
 5. Sagas事务模型(最终一致性) 作为⻓事务的解决⽅案
+
+分布式事务解决方案：2PC、3PC、TCC、SAGA、本地消息表、RocketMQ 事务消息
+rockmq：使用2阶段提交  提交一个半事务，发送到broken上，在没有conmit之前消费者不会 收到消息
+     回调机制，定期（60s）长期没有接受到connmit会回调15次 必须需要一个本地事务表 记录转态 避免回调找不到转态
+     实现2个方法 一个解释发送的mq处理update操作
+     一个是回调 checkcallback
+     
  
 
 
@@ -1692,12 +1699,69 @@ Redis 哨兵集群是一主多从， 而Redis Cluster是多主多从
 	如果不是，获得当前节点的前面一个节点名称，进入锁等待；
 	释放锁：删除创建的临时带序号节点；
 	锁等待：获取第一步的获的前一个节点名称，使用监听机制，监听这节点，当这个节点被删除的时候，重新去抢锁。
+	
+101.分布式锁 数据库 redis zk etcd
+答：redisson 开门狗自动续锁 极端情况下会丢了 超时自动释放 + 看门狗续期
 
-102.如何实现并发限流？
+    zk 使用临时顺序节点 + Watcher 机制  强一直ap 不会丢
+    所有请求在同一个持久化父节点下创建 临时顺序节点。
+    序号最小的节点获得锁。
+    后面的节点监听前一个节点的删除事件，实现排队等待，节点删除后下一个自动获取锁。
+    
+    临时顺序节点：每个客户端创建临时顺序节点
+    监听机制：只监听前一个节点，避免羊群效应
+    自动释放：会话断开，临时节点自动删除
+   
+102.如何实现并发限流？Resilience4j（限流熔断）
 答：计数器、漏桶、令牌桶。
     除了算法手动实现限流 guava也有提供限流工具 除了程序内限流 gateway 网关nginx也能实现限流。
 	短连接无状态的的集群并发接口的限流 只能靠 7层负载均衡器上的网关功能。
 	长连接或者说有状态的接口  限流 依靠 类分布式锁 准分布式锁。
+	
+	Guava RateLimiter 采用的是令牌桶算法，并且实现了预热功能（WarmUp），能够让系统在流量突增时平滑过渡到满负载状态
+    Sentinel 同时支持滑动窗口和令牌桶两种算法，滑动窗口用于 QPS 限流，令牌桶用于匀速限流
+    分布式限流通常基于 Redis 实现，常用的是滑动窗口和令牌桶算法，利用 Redis 的原子操作保证计数准确性
+    总结 
+    
+108.负载均衡算法：轮询、加权轮询、最小连接、一致性 Hash
+1.轮询算法 (Round Robin) 🔄 最简单的“排排坐，吃果果” 🍬
+最简单也最经典的算法，将请求按顺序依次分配给后端服务器，不考虑服务器的性能差异和当前负载。
+2.加权轮询算法 (Weighted Round Robin) ⚖️
+  核心原理：在轮询基础上增加权重，性能好的服务器分配更多请求，权重越高被访问的概率越大。
+3.最小连接数算法 (Least Connections) 📊
+  这才是真正关注“实时负载”的算法，尤其适合长连接场景，比如 WebSocket、数据库连接池、RPC 长链路。
+   核心原理： 动态感知服务器当前的连接数，将新请求分配给连接数最少的服务器。  
+4.一致性 Hash 算法 (Consistent Hashing) 🔑
+  前面三种都是“随机或按数分”，一致性 Hash 则为了解决“往固定机器上送”。
+  经典场景：
+  分布式缓存集群（如 Redis Cluster、Memcached）。如果随便分，同一用户的数据落到不同节点，缓存命中率直接凉凉。
+  核心原理
+  将服务器和请求都映射到一个0~2^32-1 的环形 Hash 空间，请求落在哪个服务器的顺时针区间，就由哪个服务器处理。
+ 总结：
+ 态、实时性要求高 → 最小连接
+ 静态权重、简单异构 → 加权轮询
+ 有状态，需要相同请求到同节点 → 一致性 Hash
+ 啥都很均匀，懒得动脑 → 普通轮询 
+  
+   
+
+2.一致性 Hash 的虚拟节点有什么作用？
+解决服务器分布不均导致的数据倾斜问题
+提高 Hash 环的均匀性，减少服务器增减时的影响范围
+
+123.分布式链路追踪？  OpenTelemetry
+答：1.Spring Cloud Sleuth + Zipkin
+     引入 spring-cloud-starter-sleuth，自动给日志增加 [appName, traceId, spanId] 前缀。
+     集成 spring-cloud-sleuth-zipkin 即可把 Span 上报到 Zipkin Server。
+     低侵入，适合中小规模快速搭建。
+   2.SkyWalking（Apache 开源）
+    Java Agent 方式挂载，零代码侵入。
+    自带存储、界面，支持服务拓扑图、慢端点、JVM 监控。
+    适合中大型项目，对开发者完全透明。
+    两者的选择：快速集成诊断选 Sleuth+Zipkin；长期运维监控选 SkyWalking。
+
+
+
 
 103.接口如何防重放和被篡改？
 答：1.防重放：幂等性，url里添加唯一标识参数 （通过时间戳+随机码实现也就是基于timestamp+nonce方案）然后把timestamp和其他参数一起进行数字签名。
@@ -1777,7 +1841,8 @@ Redis 哨兵集群是一主多从， 而Redis Cluster是多主多从
 		   rateLimiter.acquire();//阻塞的且会一直等待到获取令牌为止，它有一个返回值为double型，意思是从阻塞开始到获取到令牌的等待时间，单位为秒
 		   rateLimiter.tryAcquire();//它可以指定超时时间，返回值为boolean型，即假设线程等待了指定时间后仍然没有获取到令牌，那么就会返回给客户端false，客户端根据自身情况是打回给前台错误还是定时重试
          2.阿里巴巴开源限流降级中间件Sentinel（森特闹）
-
+         3.Resilience4j（限流熔断）
+         
 117.常见的几种hash算法？
 答:1.一些线程的加密算法比较成熟。MD5和SHA1为代表的杂凑函数，这些函数几乎不可能找到碰撞。
    2.常用字符串哈希函数有BKDRHash，APHash，DJBHash，JSHash，RSHash，SDBMHash，PJWHash，ELFHash等等。
@@ -2208,7 +2273,22 @@ MVCC 的目的就是多版本并发控制，在数据库中的实现，就是为
 答：1.首先找到相同的根节点（遍历树）
     2.从该节点递归的判断是否其左右子树都相等 判断两结点是否包含（递归：值、左孩子、右孩子分别相同）
                    
-
+153.延时系统？
+答：1.数据库扫描 定时spring、
+    2.rockMq延时消息、
+     3.java delayQueue、单机使用
+    4. redis zset ：a。用score存储到期时间戳 （存的时候会设置到期时间）score就是未来的执行时间
+                    b，定时轮询zrangebyscore获取到期任务 （单独写的定时任务区到其时间）
+                实战：// 伪代码
+                   String taskId = "order:cancel:" + orderId;
+                   long executeTime = System.currentTimeMillis() + 30 * 60 * 1000;
+                   redis.zadd("delay_queue", executeTime, taskId);
+                   2定时区数据
+                   long now = System.currentTimeMillis();
+                   Set<String> expiredOrders = redisTemplate.opsForZSet().rangeByScore("delay:order:cancel", 0, now, 0, 100);
+                       
+    5.、RabbitMQ 死信队列	消息 TTL + 死信交换机，消息到期后转发到死信队列
+    
   
 154、Redis中的管道有什么用？
 答：一次请求/响应服务器能实现处理新的请求即使旧的请求还未被响应。这样就可以将多个命令发送到服务器，而不用等待回复，最后在一个步骤中读取该答复。
@@ -3398,3 +3478,11 @@ jmap -histo <进程ID> | head -20
 jmap -dump:live,format=b,file=/home/myheapdump.hprof <进程ID>
 1
 4. 使用工具进行离线分析： 使用可视化工具如VisualVM等，打开导出的堆内存文件快照，通过工具提供的分析功能，查找占用内存较高的对象，并定位到创建该对象的业务代码位置。
+
+商品服务拆分
+商品管理
+库存服务
+商品高性能查询服务
+
+
+AI 工程化方向：大模型应用集成、RAG、Agent 智能体、MCP 协议

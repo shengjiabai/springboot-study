@@ -126,7 +126,7 @@ springCloud没发注解代表什么？
 12.Ribbon客户端负载均衡 @LoadBalanced//开启负载均衡默认使用的是轮询  还有其他的什么随机，重试等，使用其他的是需要在启动类加@RibbonClient(name = "CLOUD-PAYMENT-SERVICE", configuration = MySelfRule.class)
 
 13.方法上加final不允许继承和扩展
-
+ 
 13.feign客户端默认超时时间是1秒，超时就出现异常。配置文件需要
 # 设置feign客户端超时时间(OpenFeign默认支持ribbon)
 ribbon:
@@ -266,3 +266,5 @@ Proactor  前摄器 主动器 前摄器模式 异步情况下
     --spring.cloud.service-registry.auto-registration.enabled=false // 不注册服务
     --spring.zipkin.enabled=false // 这个是针对zipkin的，test环境的zipkin无人维护，不需要开启
     --spring.schedulerx2.enabled=false // 这个是针对schedulerX2的开关，置为false本地就不会注册到调度机器列表中
+    
+    Fury，通过一套支持引用、类型嵌入的语言无关协议，以及JIT动态编译加速、缓存优化和Zero-Copy等技术，实现了任意对象像动态语言自动序列化一样跨语言自动序列化，消除了语言之间的编程边界，并提供相比于业界别的框架最高20~200倍的性能。

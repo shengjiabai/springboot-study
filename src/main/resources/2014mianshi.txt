@@ -1,0 +1,150 @@
+1.如果要保持高可用，应该用什么？
+答：这里问的就是 eruk  他是ap 没有集群 节点挂了 自动到其他的上面 
+2.spring的bean的加载顺序？
+答：Constructor > @PostConstruct >InitializingBean > init-method
+ @PostConstruct注解后的方法在BeanPostProcessor前置处理器中就被执行了，所以当然要先于InitializingBean和init-method执行了,
+ https://blog.csdn.net/ZYC88888/article/details/89668905/
+ 
+ Spring装配Bean的过程
+ 登录
+ 实例化;
+ 设置属性值;
+ 如果实现了BeanNameAware接口,调用setBeanName设置Bean的ID或者Name;
+ 如果实现BeanFactoryAware接口,调用setBeanFactory 设置BeanFactory;
+ 如果实现ApplicationcontextAware,调用setApplicationcontext设置Applicationcontext
+ 调用BeanPostProcessor的预先初始化方法;
+ 调用InitializingBean的afterPropertiesset()方法，
+ 调用定制init-method方法;
+ 调用BeanPostProcessor的后初始化方法;
+ 
+3.springcloud dubbo 怎么选？
+Dubbo：
+
+优点：专注于高性能和稳定性，适用于大规模分布式系统中微服务架构。
+缺点：依赖于外部组件（如ZooKeeper或Redis）来进行服务注册和发现，可能导致服务调用中断。与服务提供方的强依赖可能会导致发布和部署过程中的问题。
+适用场景：对于需要处理大量并发请求并强调性能和稳定性的应用。
+Spring Cloud：
+
+优点：由Spring团队开发，提供一系列工具和组件以简化分布式系统的开发和部署。
+缺点：尽管支持REST服务调用，但由于接口定义可能较宽松，可能导致服务集成时的文档不一致问题。
+适用场景：对于希望快速构建和迭代分布式系统的开发者，尤其是那些已经熟悉Spring生态系统的开发者。
+综合考虑，如果您追求高性能和稳定性，同时对并发处理能力和性能有较高的要求，那么Dubbo可能是更好的选择。相反，如果您重视开发的便利性和灵活性，并且已经在使用Spring生态系统，那么Spring Cloud可能更适合您。在实际项目中，这两种框架可以结合使用，以适应不同场景下的需求
+
+4.Redis 的过期数据会被立马删除么？
+答：并不会立马删除。Redis 有两种删除过期数据的策略：
+  定期选取部分数据删除；
+  惰性删除；
+  
+  5.redis top
+  
+  6.底层 fige
+  
+  7.redission 分布式锁原理
+  
+ mvcc版本并发控制
+ 
+ 库存“
+   1.update 操作数》0  
+  2. redis实现  热点数据优先考虑Redis
+   查库存redis 扣库存 先扣redis 在扣数据库 数据库通过事务 扣减失败 之后在给redis还库存  重试多次还  还不成功认为干预
+   3.库存单独来  分表 缓解库存的压力 
+   
+   
+   mysql 加索引会锁表吗 ？ MySQL在添加索引时会对表进行锁定，但只锁定被索引的行，并不会锁住整个表。查没有影响，更新删除插入 会造成性能损耗
+   答：大表修改数据结构，比如加字段 会锁表 。晚上加 或者 在临时表里面加 开始binlog数据同步 加好之后替换表明
+      改表结构对于大表来说是非常长的过程，锁表时间很久
+      
+1.ArrayList初始化大小为10，扩容规则：扩容后的大小= 原始大小*1.5。
+2.linkList没有初始化大小，它就是一个双向链表，没有扩容，就是一直在前面或者在后面新增就好。      
+3.HashMap大小为16，扩容因子默认为0.75（可以指定初始化大小和扩容因子的）HashMap 的容量必须是2的N次方，HashMap 会根据我们传入的容量计算一个大于等于该容量的最小的2的N次方，例如传new HashMap<>(9); 容量大小为16。    
+ 线程安全list 歪课特 vector
+ 
+ 
+ JDK1.8中 ConcurrentHashMap 中的CAS 和 synchronized是如和使用的
+ CAS：在判断数组中当前位置为null的时候，使用CAS来把这个新的写入数组中对应的位置
+ synchronized ：当数组中的指定位置不为空时，通过加锁来添加这个节点进入数组(链表<8)或者是
+ 
+ AQS抽象队列同步器是Java并发中用以解决多线程访问共享资源问题的同步机制的基本的框架（或者说是一种规范），为Java并发同步组件提供统一的底层支持。即，AQS是个为各个同步组件提供基本框架的一个抽象类。
+ AQS维护了一个volatile的state表示同步状态（锁的释放与获取）和一个CLH（FIFO）双向队列。
+ 
+synchronized 考查锁的什么？ https://www.jb51.net/article/247494.htm
+ 1.synchronized 修饰普通方法和静态方
+ synchronized 修饰普通方法和静态方法看似相同，但二者完全不同，对于静态方法来说 synchronized 加锁是全局的，也就是整个程序运行期间，所有调用这个静态方法的对象都是互斥的，
+ 而普通方法是针对对象级别的，不同的对象对应着不同的锁，
+ 静态方法加锁是全局的，针对的是所有调用者；而普通方法加锁是对象级别的，不同的对象拥有的锁也不同。
+ 2.synchronized 修饰代码块
+  最常用的是给代码块加锁，而不是给方法加锁，因为给方法加锁，相当于给整个方法全部加锁，这样的话锁的粒度就太大了，程序的执行性能就会受到影响，所以通常情况下，我们会使用 synchronized 给代码块加锁，
+  this VS class
+  使用 synchronized 加锁 this 和 xxx.class 是完全不同的，当加锁 this 时，表示用当前的对象进行加锁，每个对象都对应了一把锁；
+  而当使用 xxx.class 加锁时，表示使用某个类（而非类实例）来加锁，它是应用程序级别的，是全局生效的，
+  
+  总结：就是一个全局和当前对象的区别
+    方法上：非静态就是当前方法，也就是当前当前对象 同一个对象访问才会阻塞  多个对象访问不会阻塞
+           静态的就是全局的，不管多少个对象访问，只有上一次的释放锁，才可以执行
+    代码块：this 就是当前对象加锁，每个对象对应一把锁
+           。class 应用级别的 全局生效的
+           
+  redis  sds数据结构 动态字符串 二进制
+    底层一个构造代码块：
+     struct   sdshdr{
+       int  len;记录buff数组中已使用字节的数量，也是sds保存的字符串长度（记录buff中已使用的长度）
+       int free;记录buff数组中未使用的字节的数量（buf中空闲空间长度）
+       int buff:字节数组，字符串就存在这个数组里（存的实际内容）          
+     }
+     好处：二进制安全的api操作
+         减少修改字符串长度时候所需要的内存重分配次数
+         杜绝缓冲区溢出
+         
+  redis  位操作bit使用场景 ？原理 足够长的数组，每个数组元素只可以存储0和1  setbit getbit  countbit 统计某个key 存储1的数据集合（index存用户ID  ） 几百亿数据签到 一个字节8bit 100亿/8/1024/1024=119.2mb 节省空间
+   用户签到数量统计     
+   
+   redis setnx 分布式锁  锁过期没有执行完 定时循环续命所  
+    redisson解决锁过期没有执行完的场景 看门狗后台启动线程 每隔10判断是否执行完毕
+    
+    kafka 消息不重复 可以指定key 发布在同一个pattion上
+    
+    树可以有二叉，也可以有多叉。多叉树就是每个节点有多个儿子，儿子之间的大小保证从左到右递增。二叉树是搜索效率最高的，但是实际上大多数的数据库存储却并不使用二叉树。其原因是，索引不止存在内存中，还要写到磁盘上。
+    
+    你可以想象一下一棵100万节点的平衡二叉树，树高20。一次查询可能需要访问20个数据块。在机械硬盘时代，从磁盘随机读一个数据块需要10 ms左右的寻址时间。也就是说，对于一个100万行的表，如果使用二叉树来存储，单独访问一个行可能需要20个10 ms的时间，这个查询可真够慢的。
+    
+    为了让一个查询尽量少地读磁盘，就必须让查询过程访问尽量少的数据块。那么，我们就不应该使用二叉树，而是要使用“N叉”树。这里，“N叉”树中的“N”取决于数据块的大小。
+    
+    以InnoDB的一个整数字段索引为例，这个N差不多是1200。这棵树高是4的时候，就可以存1200的3次方个值，这已经17亿了。考虑到树根的数据块总是在内存中的，一个10亿行的表上一个整数字段的索引，查找一个值最多只需要访问3次磁盘。其实，树的第二层也有很大概率在内存中，那么访问磁盘的平均次数就更少了。
+    
+    N叉树由于在读写上的性能优点，以及适配磁盘的访问模式，已经被广泛应用在数据库引擎中了
+    
+    alter table T engine=InnoDB 是用来释放 delete 操作引起的页的空洞,也就是碎片空间 操作时候尽量避免当前表的dml 操作.
+    表数据很大情况 建议使用 Percona Toolkit 工具来执行
+    
+    
+    整体比较下来，Nacos和Apollo在配置实时推送链路上是比较简单高效的，
+     Spring Cloud Config的配置推送引入Spring Cloud Bus，链路较长，比较复杂。
+     
+     Nacos和Apolo配置推送都是基于HTTP长轮询，客户端和配置中心建立HTTP长联接，当配置变更的的时候，配置中心把配置推送到客户端。
+     
+     Spring Cloud Config原生不支持配置的实时推送，需要依赖Git的WebHook、Spring Cloud Bus和客户端/bus/refresh端点:
+     1、基于Git的WebHook，配置变更触发server端refresh
+     2、Server端接收到请求并发送给Spring Cloud Bus
+     3、Spring Cloud Bus接到消息并通知给客户端
+     客户端接收到通知，请求Server端获取最新配,置
+     Spring cloud config
+     Spring Cloud Config包含config-server、Git和Spring Cloud Bus三大组件
+     1、config-server提供给客户端获取配置:  2个节点部署 Spring cloud config也得2个节点部署
+     2、Git用于存储和修改配置,
+     3、Spring Cloud Bus通知客户端配置变更
+     
+     G1为啥可以预测停顿？
+     位图底层数据结构，数组  index 怎么确定 多次hash吗
+     
+     base理论值得什么 
+     
+     项目中用到分布式事务的场景
+     
+     Io 多路复用   一个io管理多个线程还是   多个线程管理一个io io多路复用底层原理
+     
+     netty 模型
+     
+     jvm堆里面的内存是连续的吗 
+     
+     
+     

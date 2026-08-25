@@ -52,7 +52,7 @@ JDK 动态代理和 CGLIB 动态代理对比
 @PreDestroy : 当 bean 被 Web 容器的时候被调用，一般用来释放 bean 所持有的资源。。@PreDestroy 注解的方法会在Servlet 的destroy()方法之前执行。
 
 tcp连接三次握手
-客户端想服务端发送syn=1（连接请求标记） seq=x（序列号）请求连接
+客户端像服务端发送syn=1（连接请求标记） seq=x（序列号）请求连接
 服务端接受到数据返回syn=1 seq=y（服务端序列号）ack=x+1（客户端序列号+1）表示接受到请求
 客户端返回 seq=x+1 ack=y+1 表示确认请求可以开始通讯
 

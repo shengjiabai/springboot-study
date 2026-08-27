@@ -1,5 +1,5 @@
 面试讲2个项目： 商品高性能、秒杀、我的收藏、库存  definition定义beandefinition
-
+https://www.javadashen.com 这写的比较好
 gunzip -c ItemImportService-2016-11-02-2.log.gz | grep 201510CG140002140 
 
 https://www.cnblogs.com/Leo_wl/p/6181466.html 商品建模
@@ -3689,4 +3689,11 @@ AI+LangChain4j 技术栈，开发过企业内部知识库 RAG 系统和智能客
     抢红包时，LPOP 原子弹出，天然线程安全。
     配合 Lua 脚本或分布式锁保证发红包和状态流转的一致性。
  
+
+程序猿 操作Ai和普通人又是区别？
+Ai现在这么强大了还需不需要程序猿了？
+Ai你使用的那个模型在开发？
+现在AI你是怎么用的？
+你写的了解达模型，具体说说你知道那些？
+Ai写好的代码要不要人工review？
 
